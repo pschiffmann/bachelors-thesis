@@ -1,0 +1,120 @@
+% Template taken from: http://www.se.uni-hannover.de/pages/de:lehre_vorlagen
+
+\documentclass[a4paper,twoside,11pt]{article}
+%\documentclass[a4paper,twoside,openrigh,headinclude,footexclude,mpexclude,DIV11,12pt,BCOR15mm,listsleft,bibtotoc]{book}
+
+% Pakete
+\usepackage[T1]{fontenc}
+
+\usepackage[utf8]{inputenc}
+\usepackage[german]{babel}
+
+\usepackage{german} % unter anderem für bessere Silbentrennung
+
+\usepackage{listings}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{xspace}
+
+%package for drawing Gantt charts
+\usepackage{pgfgantt}
+
+% to rotate graphics in landscape format (\begin{landscape} ... )
+\usepackage{lscape}
+
+%avoid overfull hbox problem
+\setlength{\emergencystretch}{3em}
+
+%avoid underfull hbox problem in bibliography
+\usepackage{etoolbox}
+% Variant A
+\apptocmd{\sloppy}{\hbadness 2000\relax}{}{}
+% Variant B
+% \apptocmd{\thebibliography}{\raggedright}{}{}
+
+\hyphenpenalty=5000
+\tolerance=1000
+
+
+
+% standard scaling factor for graphics, to support homogenous looks.
+\newcommand{\stdScaleFactor}{0.45}
+
+\title{Implementierungsvarianten des Funktionsaufrufs in funktionalen Sprachen}
+
+\author{Philipp Schiffmann}
+
+\begin{document}
+
+\maketitle
+
+\section{Problembereich und Hintergrund}
+
+Die Programmiersprache Haskell eignet sich aufgrund ihrer mächtigen Handhabung von Funktionen gut für das Schreiben ausdrucksstarker Programme. Dank der Unterstützung von Funktionalen können Listen und Streams mittels map/filter/reduce und Aggregatorfunktionen verarbeitet werden. So lassen sich die häufigen Fehlerquellen imperativer Sprachen, Schleifen und zeitabhängige Zustandsänderungen, vermeiden. Benötigt eine Aggregatorfunktionen in Haskell neben den Listenelementen weitere Daten, können diese einfach in einem Closure festgehalten werden. Das Erzeugen eines Closures ist dank Lambda-Funktionen und partieller Funktionsauswertungen sehr simpel für den Programmierer.
+
+Diese Flexibilität im Compiler zu unterstützen, stellt allerdings einige Herausforderungen dar, die in Sprachen mit strikter Auswertung nicht auftreten. Erhält eine Funktion zu wenige Parameter, dann kann die Funktion noch nicht ausgewertet werden. Stattdessen müssen sie in einem Closure zwischengespeichert werden, bis die übrigen Parameter übergeben werden. Erhält eine Funktion hingegen zu viele Parameter, müssen diese für eine spätere Verwendung durch nachfolgende Funktionen aufgehoben werden.
+
+\section{Problemstellung}
+
+Bei den hier angesprochenen Problemen handelt es sich also um Fragen der Speicherverwaltung. Betrachtet man verschiedene Implementierungsvarianten, gilt die erste Frage der reinen Umsetzbarkeit: Ist es mit einem bestimmten Adressierungsschema überhaupt möglich, eine Parameterliste sukzessive aufzufüllen, oder ein Closure als Parameter an eine andere Funktion zu übergeben?
+
+Für diejenigen Varianten, die dieses Kriterium erfüllen, schließt sich die Frage nach der Effizienz der Lösung an: Wie viele Instruktionen werden benötigt, um einen Parameter oder ein Zwischenergebnis zu adressieren; eine Parameterliste aufzufüllen; oder ein Ergebnis an den Aufrufer zurückzugeben?
+
+\section{Lösungsansatz}
+
+Gegenstand der Arbeit sind die folgenden Implementierungsvarianten für die Parameterübergabe:
+
+\begin{enumerate}
+\item in deklarierter Reihenfolge über den organisatorischen Zellen
+\item in deklarierter Reihenfolge unter den organisatorischen Zellen
+\item entgegen der deklarierten Reihenfolge über den organisatorischen Zellen
+\item entgegen der deklarierten Reihenfolge unter den organisatorischen Zellen
+\item als Halden-Vektor analog zum Globalvektor
+\end{enumerate}
+
+Die ersten Bearbeitungsschritte werden sein, Beispiele zu den oben genannten Situationen zu formulieren; sowie fünf Übersetzungsfunktionen zu definieren, die diese Adressierungsschemata nutzen. Anschließend können die Beispiele übersetzt und die sich daraus ergebenden Assemblerprogramme verglichen werden.
+
+
+\section{Ziel der Arbeit}
+
+Ziel der Arbeit ist es, die Vor- und Nachteile der oben genannten Implementierungsvarianten in den Bereichen Umsetzbarkeit und Effizienz herauszuarbeiten. Die Arbeit wird alle Varianten gegenüberstellen, miteinander vergleichen, und daraufhin eine Empfehlung aussprechen.
+
+Außerdem soll im Rahmen der Arbeit ein Simulationsprogramm für die virtuelle F-Maschine (aus Quelle ??) erstellt werden, mit der die Beispielprogramme veranschaulicht werden können. Die virtuelle Maschine wird Programme in der entsprechenden Assemblersprache entgegennehmen und ausführen. Die Ausführung kann dabei entweder nach einer einzigen Instruktion oder beim nächsten breakpoint pausiert und wieder fortgesetzt werden. Speicherinhalte sind in einer grafischen Oberfläche auslesbar und werden  in jedem Laufzeitschritt aktualisiert.
+
+\newpage
+\section{Arbeitsprogramm}
+
+
+\begin{figure}[h]
+\begin{ganttchart}[
+hgrid, vgrid,
+x unit=0.4cm,
+y unit chart=0.5cm,
+newline shortcut=true,
+group label node/.append style={align=left}]{1}{16}
+\gantttitle{Monat 1}{4}
+\gantttitle{Monat 2}{4}
+\gantttitle{Monat 3}{4}
+\gantttitle{Monat 4}{4}\\
+\ganttbar{Literaturrecherche}{1}{6} \\
+\ganttbar{Programmierung VM}{2}{6} \\
+\ganttbar{Programmierung GUI}{4}{8} \\
+\ganttbar{Analyse Variante 1}{3}{4} \\
+\ganttbar{Analyse Variante 2}{5}{6} \\
+\ganttbar{Analyse Variante 3}{7}{8} \\
+\ganttbar{Analyse Variante 4}{9}{10} \\
+\ganttbar{Analyse Variante 5}{11}{12} \\
+\ganttbar{Evaluation}{13}{14} \\
+\ganttbar{Anfertigen der Ausarbeitung}{4}{14} \\
+\ganttbar{Überarbeiten der Ausarbeitung}{15}{16}
+\end{ganttchart}
+%\caption{Projektplan}
+%\label{fig:projektplan}
+\end{figure}
+
+%\end{landscape}
+
+
+\end{document}
