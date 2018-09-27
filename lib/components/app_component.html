@@ -1,0 +1,15 @@
+<h1>F-Maschine</h1>
+
+<ul>
+  <li *ngFor="let value of vm.stack; let i=index">
+    {{i}} | {{value}}
+  </li>
+</ul>
+
+<div>
+  <material-fab mini
+                raised
+                (trigger)="executeSingleInstruction()">
+    <material-icon icon="skip_next"></material-icon>
+  </material-fab>
+</div>
