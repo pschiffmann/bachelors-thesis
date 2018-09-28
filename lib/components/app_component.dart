@@ -9,7 +9,7 @@ import 'package:fvm/virtual_machine.dart';
     styleUrls: ['app_component.css'],
     templateUrl: 'app_component.html',
     directives: [
-      MaterialFabComponent,
+      MaterialButtonComponent,
       MaterialIconComponent,
       NgFor,
       NgIf,
@@ -18,7 +18,9 @@ class AppComponent implements OnInit {
   VM vm;
 
   @override
-  Future<Null> ngOnInit() async {
+  Future<Null> ngOnInit() async => initializeDemoVM();
+
+  void initializeDemoVM() {
     vm = VM([
       LoadConstantInstruction(3),
       LoadConstantInstruction(4),
@@ -30,6 +32,6 @@ class AppComponent implements OnInit {
     try {
       vm.executeCurrentInstruction();
       print(vm.stack);
-    } on UnsupportedError {}
+    } on UnsupportedError {} on IndexError {}
   }
 }

@@ -1,3 +1,49 @@
 :host {
-    /* This is equivalent of the 'body' selector of a page. */
+  /* This is equivalent of the 'body' selector of a page. */
+}
+
+.memory-block {
+  width: 100px;
+  counter-reset: line-number -1;
+}
+
+.memory-cell {
+  display: block;
+  background-color: lightgrey;
+  border: 1px solid grey;
+  width: 100px;
+  text-align: right;
+  line-height: 1.5rem;
+}
+
+.memory-cell::before {
+  counter-increment: line-number;
+  content: counter(line-number);
+  display: inline-block;
+  border-right: 1px solid #ddd;
+  padding: 0 .5em;
+  margin-right: .5em;
+  color: #888;
+}
+
+.instruction-cell {
+  display: block;
+  background-color: lightgrey;
+  border: 1px solid grey;
+}
+
+.instruction-cell::before {
+  counter-increment: line-number;
+  content: counter(line-number);
+  display: inline-block;
+  border-right: 1px solid #ddd;
+  padding: 0 .5em;
+  margin-right: .5em;
+  color: #888;
+}
+
+.pointer-indicator {
+  background: turquoise;
+  border: 1px solid black;
+  margin: 3px;
 }

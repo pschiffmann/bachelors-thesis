@@ -1,15 +1,32 @@
 <h1>F-Maschine</h1>
 
-<ul>
-  <li *ngFor="let value of vm.stack; let i=index">
-    {{i}} | {{value}}
-  </li>
-</ul>
+<h2>Stack</h2>
+<div class="memory-block">
+  <pre>
+    <span *ngFor="let value of vm.stack"
+          class="memory-cell">{{value}}</span>
+  </pre>
+</div>
+
+<h2>program memory</h2>
+<div class="memory-block">
+  <pre>
+    <span *ngFor="let instruction of vm.program; let i = index"
+          class="instruction-cell">
+      {{instruction}}
+      <span *ngIf="i==vm.programCounter"
+            class="pointer-indicator">PC</span>
+    </span>
+  </pre>
+</div>
 
 <div>
-  <material-fab mini
-                raised
-                (trigger)="executeSingleInstruction()">
+  <material-button raised
+                   (trigger)="executeSingleInstruction()">
     <material-icon icon="skip_next"></material-icon>
-  </material-fab>
+  </material-button>
+  <material-button raised
+                   (trigger)="initializeDemoVM()">
+    <material-icon icon="replay"></material-icon>
+  </material-button>
 </div>
