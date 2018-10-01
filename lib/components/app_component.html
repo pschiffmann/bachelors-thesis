@@ -1,16 +1,19 @@
 <h1>F-Maschine</h1>
 
-<h2>Stack</h2>
-<div class="memory-block">
-  <pre>
+<div id="stack">
+  <h2>Stack</h2>
+  <div class="memory-block">
+    <pre>
     <span *ngFor="let value of vm.stack"
           class="memory-cell">{{value}}</span>
   </pre>
+  </div>
 </div>
 
-<h2>program memory</h2>
-<div class="memory-block">
-  <pre>
+<div id="program">
+  <h2>program memory</h2>
+  <div class="memory-block">
+    <pre>
     <span *ngFor="let instruction of vm.program; let i = index"
           class="instruction-cell">
       {{instruction}}
@@ -18,6 +21,7 @@
             class="pointer-indicator">PC</span>
     </span>
   </pre>
+  </div>
 </div>
 
 <div>

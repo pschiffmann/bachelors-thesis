@@ -2,6 +2,16 @@
   /* This is equivalent of the 'body' selector of a page. */
 }
 
+#stack {
+  float: left;
+  margin: 30px;
+}
+
+#program {
+  float: left;
+  margin: 30px;
+}
+
 .memory-block {
   width: 100px;
   counter-reset: line-number -1;
