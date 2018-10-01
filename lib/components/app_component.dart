@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:angular/angular.dart';
 import 'package:angular_components/angular_components.dart';
+import 'package:fvm/assembly_parser.dart';
 import 'package:fvm/virtual_machine.dart';
 
 @Component(
@@ -21,11 +22,14 @@ class AppComponent implements OnInit {
   Future<Null> ngOnInit() async => initializeDemoVM();
 
   void initializeDemoVM() {
-    vm = VM([
-      LoadConstantInstruction(3),
-      LoadConstantInstruction(4),
-      AddInstruction()
-    ], stackSize: 16, heapSize: 16);
+    final parseResult = parse('''
+    loadc 3,
+    loadc  4 ,
+    add,
+    -- example comment
+    halt
+    ''');
+    vm = VM(parseResult.key, parseResult.value, stackSize: 16, heapSize: 16);
   }
 
   void executeSingleInstruction() {
