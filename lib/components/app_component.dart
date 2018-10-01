@@ -24,8 +24,10 @@ class AppComponent implements OnInit {
   void initializeDemoVM() {
     final parseResult = parse('''
     loadc 3,
+    A:
     loadc  4 ,
     add,
+    jump A,
     -- example comment
     halt
     ''');
