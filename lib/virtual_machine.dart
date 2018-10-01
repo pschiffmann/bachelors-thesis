@@ -10,13 +10,15 @@ const int defaultHeapSize = 2 << 8;
 /// A VM object is mutable and supports modifications from outside. To run
 /// [program], you can use [executeProgram] or [executeCurrentInstruction].
 class VM {
-  VM(List<Instruction> program,
+  VM(List<Instruction> program, Map<String, int> labelAddresses,
       {int stackSize: defaultStackSize, int heapSize: defaultHeapSize})
-      : stack = Uint32List(stackSize),
-        heap = Uint32List(heapSize),
-        program = List.unmodifiable(program);
+      : program = List.unmodifiable(program),
+        labelAddresses = Map.unmodifiable(labelAddresses),
+        stack = Uint32List(stackSize),
+        heap = Uint32List(heapSize);
 
   final List<Instruction> program;
+  final Map<String, int> labelAddresses;
   final Uint32List stack;
   final Uint32List heap;
 
@@ -54,6 +56,7 @@ abstract class Instruction {
   void execute(VM vm);
 }
 
+/// Pushes [value] onto the stack.
 class LoadConstantInstruction implements Instruction {
   LoadConstantInstruction(this.value);
   final int value;
@@ -64,16 +67,56 @@ class LoadConstantInstruction implements Instruction {
   String toString() => 'loadc $value';
 }
 
+/// Sets the program counter to [target].
+class JumpInstruction implements Instruction {
+  JumpInstruction(this.target);
+  final String target;
+
+  @override
+  void execute(VM vm) => vm.programCounter = vm.labelAddresses[target] ??
+      (throw StateError('Label `$target` is not declared in this program'));
+  @override
+  String toString() => 'jump $target';
+}
+
+/// Sets the program counter to [target] if the top stack value is 0.
+class JumpIfZeroInstruction implements Instruction {
+  JumpIfZeroInstruction(this.target);
+  final String target;
+
+  @override
+  void execute(VM vm) {
+    if (vm.pop() == 0) {
+      vm.programCounter = vm.labelAddresses[target] ??
+          (throw StateError('Label `$target` is not declared in this program'));
+    }
+  }
+
+  @override
+  String toString() => 'jumpz $target';
+}
+
 class AddInstruction implements Instruction {
+  const AddInstruction();
   @override
   void execute(VM vm) => vm.push(vm.pop() + vm.pop());
   @override
   String toString() => 'add';
 }
 
-class HaltInstruction implements Instruction {
+class SubtractInstruction implements Instruction {
+  const SubtractInstruction();
   @override
-  void execute(VM vm) => throw UnsupportedError('');
+  void execute(VM vm) => vm.push(vm.pop() + vm.pop());
+  @override
+  String toString() => 'sub';
+}
+
+class HaltInstruction implements Instruction {
+  const HaltInstruction();
+  @override
+  void execute(VM vm) =>
+      throw UnsupportedError('`halt` instruction cannot be executed');
   @override
   String toString() => 'halt';
 }
