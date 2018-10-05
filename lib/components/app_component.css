@@ -4,12 +4,12 @@
 
 #stack {
   float: left;
-  margin: 30px;
+  margin: 0 30px;
 }
 
 #program {
   float: left;
-  margin: 30px;
+  margin: 0 30px;
 }
 
 .memory-block {
@@ -29,8 +29,10 @@
 .memory-cell::before {
   counter-increment: line-number;
   content: counter(line-number);
-  display: inline-block;
+  display: block;
   border-right: 1px solid #ddd;
+  float: left;
+  width: 1.5em;
   padding: 0 .5em;
   margin-right: .5em;
   color: #888;
