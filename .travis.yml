@@ -1,0 +1,8 @@
+# https://docs.travis-ci.com/user/languages/dart
+language: dart
+
+dart_task:
+- test: --platform vm
+# - test: --platform chrome
+- dartanalyzer: --fatal-infos --fatal-warnings lib
+- dartfmt: true
