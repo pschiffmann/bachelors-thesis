@@ -2,5 +2,5 @@
 language: dart
 
 dart_task:
-- dartanalyzer: --fatal-warnings
-- dartfmt: --fix
+- dartanalyzer: --fatal-infos --fatal-warnings .
+- dartfmt: true
