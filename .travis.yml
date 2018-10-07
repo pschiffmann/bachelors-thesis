@@ -2,5 +2,7 @@
 language: dart
 
 dart_task:
-- dartanalyzer: --fatal-infos --fatal-warnings .
+- test: --platform vm
+# - test: --platform chrome
+- dartanalyzer: --fatal-infos --fatal-warnings lib
 - dartfmt: true
