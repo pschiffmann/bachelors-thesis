@@ -3,24 +3,24 @@ language: dart
 
 jobs:
   include:
-    - stage: analyze
-      name: "SDK: stable - DIR: fvm - TASKS: dartanalyzer ."
+    - stage: static_analysis
+      name: "SDK: stable - DIR: fvm - TASKS: dartanalyzer --fatal-infos --fatal-warnings ."
       script: ./tool/travis.sh dartanalyzer
       env: PKG="fvm"
       dart: stable
-    - stage: analyze
-      name: "SDK: stable - DIR: fvm - TASKS: dartfmt -n --set-exit-if-changed ."
-      script: ./tool/travis.sh dartfmt
+    - stage: static_analysis
+      name: "SDK: stable - DIR: fvm - TASKS: dartfmt --fix -n --set-exit-if-changed ."
+      script: ./tool/travis.sh command_0
       env: PKG="fvm"
       dart: stable
     - stage: unit_test
-      name: "SDK: stable - DIR: fvm - TASKS: pub run test"
-      script: ./tool/travis.sh test
+      name: "SDK: stable - DIR: fvm - TASKS: pub run build_runner test"
+      script: ./tool/travis.sh command_1
       env: PKG="fvm"
       dart: stable
 
 stages:
-  - analyze
+  - static_analysis
   - unit_test
 
 # Only building master means that we don't run two builds for each pull request.
@@ -31,3 +31,4 @@ branches:
 cache:
   directories:
     - "$HOME/.pub-cache"
+    - fvm/.dart_tool/build
