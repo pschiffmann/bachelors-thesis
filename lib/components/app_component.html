@@ -4,9 +4,9 @@
   <h2>Stack</h2>
   <div class="memory-block">
     <pre>
-    <span *ngFor="let value of vm.stack"
-          class="memory-cell">{{value}}</span>
-  </pre>
+      <span *ngFor="let value of vm.stack"
+            class="memory-cell">{{value}}</span>
+    </pre>
   </div>
 </div>
 
@@ -14,13 +14,13 @@
   <h2>program memory</h2>
   <div class="memory-block">
     <pre>
-    <span *ngFor="let instruction of vm.program; let i = index"
-          class="instruction-cell">
-      {{instruction}}
-      <span *ngIf="i==vm.programCounter"
-            class="pointer-indicator">PC</span>
-    </span>
-  </pre>
+      <span *ngFor="let instruction of vm.program; let i = index"
+            class="instruction-cell">
+        {{instruction}}
+        <span *ngIf="i==vm.programCounter"
+              class="pointer-indicator">PC</span>
+      </span>
+    </pre>
   </div>
 </div>
 
