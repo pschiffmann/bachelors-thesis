@@ -1,8 +1,33 @@
-# https://docs.travis-ci.com/user/languages/dart
+# Created with package:mono_repo v1.2.1-dev
 language: dart
 
-dart_task:
-- test: --platform vm
-# - test: --platform chrome
-- dartanalyzer: --fatal-infos --fatal-warnings lib
-- dartfmt: true
+jobs:
+  include:
+    - stage: analyze
+      name: "SDK: stable - DIR: fvm - TASKS: dartanalyzer ."
+      script: ./tool/travis.sh dartanalyzer
+      env: PKG="fvm"
+      dart: stable
+    - stage: analyze
+      name: "SDK: stable - DIR: fvm - TASKS: dartfmt -n --set-exit-if-changed ."
+      script: ./tool/travis.sh dartfmt
+      env: PKG="fvm"
+      dart: stable
+    - stage: unit_test
+      name: "SDK: stable - DIR: fvm - TASKS: pub run test"
+      script: ./tool/travis.sh test
+      env: PKG="fvm"
+      dart: stable
+
+stages:
+  - analyze
+  - unit_test
+
+# Only building master means that we don't run two builds for each pull request.
+branches:
+  only:
+    - master
+
+cache:
+  directories:
+    - "$HOME/.pub-cache"
