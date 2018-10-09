@@ -11,7 +11,7 @@ const int defaultHeapSize = 2 << 8;
 /// [program], you can use [executeProgram] or [executeCurrentInstruction].
 class VM {
   VM(List<Instruction> program, Map<String, int> labelAddresses,
-      {int stackSize: defaultStackSize, int heapSize: defaultHeapSize})
+      {int stackSize = defaultStackSize, int heapSize = defaultHeapSize})
       : program = List.unmodifiable(program),
         labelAddresses = Map.unmodifiable(labelAddresses),
         stack = Uint32List(stackSize),

@@ -1,0 +1,11 @@
+dart:
+- stable
+stages:
+  - static_analysis:
+    - dartanalyzer: --fatal-infos --fatal-warnings .
+    - command: dartfmt --fix -n --set-exit-if-changed .
+  - unit_test:
+    - command: pub run build_runner test
+cache:
+  directories:
+    - .dart_tool/build
