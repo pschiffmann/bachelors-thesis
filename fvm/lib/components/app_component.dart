@@ -31,7 +31,7 @@ class AppComponent implements OnInit {
     -- example comment
     halt
     ''');
-    vm = VM(parseResult.key, parseResult.value, stackSize: 16, heapSize: 16);
+    vm = VM(parseResult.key, parseResult.value, stackSize: 16);
   }
 
   void executeSingleInstruction() {
