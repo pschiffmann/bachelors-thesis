@@ -73,3 +73,54 @@ class HaltInstruction implements Instruction {
   @override
   String toString() => 'halt';
 }
+
+class AllocateTaggedIntInstruction implements Instruction {
+  const AllocateTaggedIntInstruction();
+  @override
+  void execute(VM vm) => vm.push(vm.allocate(TaggedInt(vm.pop())));
+  @override
+  String toString() => 'mkB';
+}
+
+class AllocateTaggedReferenceListInstruction implements Instruction {
+  AllocateTaggedReferenceListInstruction(this.length);
+  final int length;
+
+  @override
+  void execute(VM vm) {
+    final references =
+        vm.stack.sublist(vm.stackPointer - length + 1, vm.stackPointer + 1);
+    vm
+      ..stackPointer -= length
+      ..push(vm.allocate(TaggedReferenceList(references)));
+  }
+
+  @override
+  String toString() => 'mkV $length';
+}
+
+class AllocateTaggedFunctionInstruction implements Instruction {
+  AllocateTaggedFunctionInstruction(this.functionLabel);
+  final String functionLabel;
+
+  @override
+  void execute(VM vm) {
+    final globalVector = vm.pop();
+    final argumentVector = vm.allocate(const TaggedReferenceList.empty());
+    vm.push(vm
+        .allocate(TaggedFunction(functionLabel, globalVector, argumentVector)));
+  }
+
+  @override
+  String toString() => 'mkF $functionLabel';
+}
+
+class AllocateTaggedClosureInstruction implements Instruction {
+  AllocateTaggedClosureInstruction(this.expressionLabel);
+  final String expressionLabel;
+  @override
+  void execute(VM vm) =>
+      vm.push(vm.allocate(TaggedClosure(expressionLabel, vm.pop())));
+  @override
+  String toString() => 'mkC $expressionLabel';
+}

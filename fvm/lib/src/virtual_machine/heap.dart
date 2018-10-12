@@ -19,11 +19,39 @@ class TaggedInt implements TaggedObject {
 
 class TaggedReferenceList implements TaggedObject {
   TaggedReferenceList(this.values);
+  const TaggedReferenceList.empty() : values = const [];
 
   final List<int> values;
+  int get length => values.length;
 
   @override
   String get tag => 'V';
   @override
-  int get sizeInCells => 1 + values.length;
+  int get sizeInCells => 2 + values.length;
+}
+
+class TaggedFunction implements TaggedObject {
+  TaggedFunction(
+      this.functionLabel, this.globalVectorAddress, this.argumentVectorAddress);
+
+  final String functionLabel;
+  final int globalVectorAddress;
+  final int argumentVectorAddress;
+
+  @override
+  String get tag => 'F';
+  @override
+  int get sizeInCells => 3;
+}
+
+class TaggedClosure implements TaggedObject {
+  TaggedClosure(this.expressionLabel, this.globalVectorAddress);
+
+  final String expressionLabel;
+  final int globalVectorAddress;
+
+  @override
+  String get tag => 'C';
+  @override
+  int get sizeInCells => 2;
 }
