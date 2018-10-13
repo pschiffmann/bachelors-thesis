@@ -10,6 +10,7 @@ const int defaultInitialStackSize = 10;
 /// Because the heap grows towards 0, heap allocation starts at this address.
 const int defaultMaxAddress = (2 << 16) - 1;
 
+
 /// This class stores the hardware state of a simulated F machine. This includes
 /// the values of the registers and the contents of the stack, heap, and program
 /// memory.
