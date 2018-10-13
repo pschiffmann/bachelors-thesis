@@ -22,12 +22,12 @@ class VM {
       int initialStackSize = defaultInitialStackSize})
       : program = List.unmodifiable(program),
         labelAddresses = Map.unmodifiable(labelAddresses),
-        stack = Uint32List(initialStackSize);
+        stack = Int32List(initialStackSize);
 
   final List<Instruction> program;
   final Map<String, int> labelAddresses;
   final int maxAddress;
-  final Uint32List stack;
+  final Int32List stack;
 
   /// Stores heap-allocated objects. The keys are the addresses.
   final Map<int, TaggedObject> heap = {};
