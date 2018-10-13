@@ -49,20 +49,135 @@ class JumpIfZeroInstruction implements Instruction {
   String toString() => 'jumpz $target';
 }
 
-class AddInstruction implements Instruction {
+abstract class BinaryOperatorInstruction implements Instruction {
+  const BinaryOperatorInstruction();
+  int calculate(int op1, int op2);
+  @override
+  void execute(VM vm) {
+    vm.stackPointer--;
+    vm.stack[vm.stackPointer] =
+        calculate(vm.stack[vm.stackPointer], vm.stack[vm.stackPointer + 1]);
+  }
+}
+
+class AddInstruction extends BinaryOperatorInstruction {
   const AddInstruction();
   @override
-  void execute(VM vm) => vm.push(vm.pop() + vm.pop());
+  int calculate(int op1, int op2) => op1 + op2;
   @override
   String toString() => 'add';
 }
 
-class SubtractInstruction implements Instruction {
+class SubtractInstruction extends BinaryOperatorInstruction {
   const SubtractInstruction();
   @override
-  void execute(VM vm) => vm.push(vm.pop() + vm.pop());
+  int calculate(int op1, int op2) => op1 - op2;
   @override
   String toString() => 'sub';
+}
+
+class MultiplyInstruction extends BinaryOperatorInstruction {
+  const MultiplyInstruction();
+  @override
+  int calculate(int op1, int op2) => op1 * op2;
+  @override
+  String toString() => 'mul';
+}
+
+class DivideInstruction extends BinaryOperatorInstruction {
+  const DivideInstruction();
+  @override
+  int calculate(int op1, int op2) => op1 ~/ op2;
+  @override
+  String toString() => 'div';
+}
+
+class ModuloInstruction extends BinaryOperatorInstruction {
+  const ModuloInstruction();
+  @override
+  int calculate(int op1, int op2) => op1 % op2;
+  @override
+  String toString() => 'mod';
+}
+
+class NegateInstruction implements Instruction {
+  const NegateInstruction();
+  @override
+  void execute(VM vm) => vm.push(-vm.pop());
+  @override
+  String toString() => 'neg';
+}
+
+class EqualsInstruction extends BinaryOperatorInstruction {
+  const EqualsInstruction();
+  @override
+  int calculate(int op1, int op2) => op1 == op2 ? 1 : 0;
+  @override
+  String toString() => 'eq';
+}
+
+class NotEqualsInstruction extends BinaryOperatorInstruction {
+  const NotEqualsInstruction();
+  @override
+  int calculate(int op1, int op2) => op1 != op2 ? 1 : 0;
+  @override
+  String toString() => 'neq';
+}
+
+class LessThanInstruction extends BinaryOperatorInstruction {
+  const LessThanInstruction();
+  @override
+  int calculate(int op1, int op2) => op1 < op2 ? 1 : 0;
+  @override
+  String toString() => 'le';
+}
+
+class LessEqualsInstruction extends BinaryOperatorInstruction {
+  const LessEqualsInstruction();
+  @override
+  int calculate(int op1, int op2) => op1 <= op2 ? 1 : 0;
+  @override
+  String toString() => 'leq';
+}
+
+class GreaterThanInstruction extends BinaryOperatorInstruction {
+  const GreaterThanInstruction();
+  @override
+  int calculate(int op1, int op2) => op1 > op2 ? 1 : 0;
+  @override
+  String toString() => 'gr';
+}
+
+class GreaterEqualsInstruction extends BinaryOperatorInstruction {
+  const GreaterEqualsInstruction();
+  @override
+  int calculate(int op1, int op2) => op1 >= op2 ? 1 : 0;
+  @override
+  String toString() => 'geq';
+}
+
+class AndInstruction extends BinaryOperatorInstruction {
+  const AndInstruction();
+  @override
+  int calculate(int op1, int op2) => op1 != 0 && op2 != 0 ? 1 : 0;
+  @override
+  String toString() => 'and';
+}
+
+class OrInstruction extends BinaryOperatorInstruction {
+  const OrInstruction();
+  @override
+  int calculate(int op1, int op2) => op1 != 0 || op2 != 0 ? 1 : 0;
+  @override
+  String toString() => 'or';
+}
+
+class NotInstruction implements Instruction {
+  const NotInstruction();
+  @override
+  void execute(VM vm) => vm.push(vm.pop() == 0 ? 1 : 0);
+  @override
+  String toString() => 'not';
 }
 
 class HaltInstruction implements Instruction {

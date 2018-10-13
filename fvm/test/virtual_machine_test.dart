@@ -67,12 +67,147 @@ void main() {
     VM vm;
     setUp(() => vm = VM(const [], const {}, maxAddress: maxAddress));
 
-    test('`add` sums up the top stack cells and decreases the stack pointer',
-        () {
-      vm..push(2)..push(3);
-      const AddInstruction().execute(vm);
+    test('`loadc` pushes a value on the stack', () {
+      LoadConstantInstruction(4).execute(vm);
       expect(vm.stackPointer, equals(0));
-      expect(vm.pop(), equals(5));
+      expect(vm.peek(), equals(4));
+    });
+
+    test('`jump` sets the `programCounter`', () {
+      final vm = VM(const [], const {'A': 60});
+      JumpInstruction('A').execute(vm);
+      expect(vm.programCounter, equals(60));
+    });
+
+    group('`jumpz`', () {
+      test('sets the `programCounter` if the top stack value is 0', () {
+        final vm = VM(const [], const {'B': 30})..push(0);
+        JumpIfZeroInstruction('B').execute(vm);
+        expect(vm.programCounter, equals(30));
+        expect(vm.stackPointer, equals(-1));
+      });
+
+      test('does nothing if the top stack value is not 0', () {
+        final vm = VM(const [], const {'B': 30})..push(5);
+        JumpIfZeroInstruction('B').execute(vm);
+        // Note: the program counter should be the same as before, because we
+        // don't call [VM.executeCurrentInstruction].
+        expect(vm.programCounter, equals(0));
+        expect(vm.stackPointer, equals(-1));
+      });
+    });
+
+    group('arithmetic/logic instructions:', () {
+      setUp(() => vm..push(10)..push(3));
+
+      test('`add` sums up the top stack cells', () {
+        const AddInstruction().execute(vm);
+        expect(vm.stackPointer, equals(0));
+        expect(vm.peek(), equals(13));
+      });
+
+      test('`sub` subtracts the top stack cells', () {
+        const SubtractInstruction().execute(vm);
+        expect(vm.stackPointer, equals(0));
+        expect(vm.peek(), equals(7));
+      });
+
+      test('`mul` multiplies the top stack cells', () {
+        const MultiplyInstruction().execute(vm);
+        expect(vm.stackPointer, equals(0));
+        expect(vm.peek(), equals(30));
+      });
+
+      test('`div` divides the top stack cells', () {
+        const DivideInstruction().execute(vm);
+        expect(vm.stackPointer, equals(0));
+        expect(vm.peek(), equals(3));
+      });
+
+      test('`mod` calculates the modulo of the top stack cells', () {
+        const ModuloInstruction().execute(vm);
+        expect(vm.stackPointer, equals(0));
+        expect(vm.peek(), equals(1));
+      });
+
+      test('`neg` negates the top stack cell', () {
+        const NegateInstruction().execute(vm);
+        expect(vm.stackPointer, equals(1));
+        expect(vm.peek(), equals(-3));
+      });
+
+      test('`eq` compares the top stack cells for equality', () {
+        const EqualsInstruction().execute(vm);
+        expect(vm.stackPointer, equals(0));
+        expect(vm.peek(), equals(0));
+      });
+
+      test('`neq` compares the top stack cells for inequality', () {
+        const NotEqualsInstruction().execute(vm);
+        expect(vm.stackPointer, equals(0));
+        expect(vm.peek(), equals(1));
+      });
+
+      test('`le` compares the top stack cells with "less than"', () {
+        const LessThanInstruction().execute(vm);
+        expect(vm.stackPointer, equals(0));
+        expect(vm.peek(), equals(0));
+      });
+
+      test('`leq` compares the top stack cells with "less equals"', () {
+        const LessEqualsInstruction().execute(vm);
+        expect(vm.stackPointer, equals(0));
+        expect(vm.peek(), equals(0));
+      });
+
+      test('`gr` compares the top stack cells with "greater than"', () {
+        const GreaterThanInstruction().execute(vm);
+        expect(vm.stackPointer, equals(0));
+        expect(vm.peek(), equals(1));
+      });
+
+      test('`geq` compares the top stack cells with "greater equals"', () {
+        const GreaterEqualsInstruction().execute(vm);
+        expect(vm.stackPointer, equals(0));
+        expect(vm.peek(), equals(1));
+      });
+
+      test('`and` checks whether the two top cells are not null', () {
+        const AndInstruction().execute(vm);
+        expect(vm.stackPointer, equals(0));
+        expect(vm.peek(), equals(1));
+
+        vm..push(-5)..push(0);
+        const AndInstruction().execute(vm);
+        expect(vm.peek(), equals(0));
+      });
+
+      test('`or` checks whether one of the two top stack cells are not null',
+          () {
+        vm
+          ..stackPointer = -1
+          ..push(10)
+          ..push(0);
+        const OrInstruction().execute(vm);
+        expect(vm.stackPointer, equals(0));
+        expect(vm.peek(), equals(1));
+
+        vm..push(0)..push(0);
+        const OrInstruction().execute(vm);
+        expect(vm.peek(), equals(0));
+      });
+
+      test('`not` toggles the top stack cell between 0 and not 0', () {
+        const NotInstruction().execute(vm);
+        expect(vm.stackPointer, equals(1));
+        expect(vm.peek(), equals(0));
+        const NotInstruction().execute(vm);
+        expect(vm.peek(), equals(1));
+      });
+    });
+
+    test('`halt` throws an UnsupportedError', () {
+      expect(() => const HaltInstruction().execute(vm), throwsUnsupportedError);
     });
 
     test('`mkB` wraps the top stack value in a `TaggedInt`', () {
