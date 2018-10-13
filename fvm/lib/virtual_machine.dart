@@ -1,7 +1,14 @@
+library fvm.virtual_machine;
+
 import 'dart:typed_data';
 
-const int defaultStackSize = 2 << 8;
-const int defaultHeapSize = 2 << 8;
+part 'src/virtual_machine/heap.dart';
+part 'src/virtual_machine/instructions.dart';
+
+const int defaultInitialStackSize = 10;
+
+/// Because the heap grows towards 0, heap allocation starts at this address.
+const int defaultMaxAddress = (2 << 16) - 1;
 
 /// This class stores the hardware state of a simulated F machine. This includes
 /// the values of the registers and the contents of the stack, heap, and program
@@ -11,20 +18,32 @@ const int defaultHeapSize = 2 << 8;
 /// [program], you can use [executeProgram] or [executeCurrentInstruction].
 class VM {
   VM(List<Instruction> program, Map<String, int> labelAddresses,
-      {int stackSize = defaultStackSize, int heapSize = defaultHeapSize})
+      {this.maxAddress = defaultMaxAddress,
+      int initialStackSize = defaultInitialStackSize})
       : program = List.unmodifiable(program),
         labelAddresses = Map.unmodifiable(labelAddresses),
-        stack = Uint32List(stackSize),
-        heap = Uint32List(heapSize);
+        stack = Uint32List(initialStackSize);
 
   final List<Instruction> program;
   final Map<String, int> labelAddresses;
+  final int maxAddress;
   final Uint32List stack;
-  final Uint32List heap;
 
-  int stackPointer = -1;
+  /// Stores heap-allocated objects. The keys are the addresses.
+  final Map<int, TaggedObject> heap = {};
+
   int programCounter = 0;
+  int stackPointer = -1;
+  int stackPointer0 = -1;
+  int framePointer = -1;
+  int globalPointer = -1;
 
+  /// Returns highest address in [heap] at which no object is allocated.
+  int get nextHeapAddress =>
+      heap.isEmpty ? maxAddress : heap.keys.last - heap.values.last.sizeInCells;
+
+  /// Fetches the instruction pointed to by [programCounter]; increases
+  /// [programCounter] by 1; and then executes the fetched instruction.
   void executeCurrentInstruction() => program[programCounter++].execute(this);
 
   int executeProgram() {
@@ -43,80 +62,28 @@ class VM {
   /// by 1.
   int pop() => stack[stackPointer--];
 
+  /// Returns the value from the top of [stack] without changing [stackPointer].
+  int peek() => stack[stackPointer];
+
   /// Puts [value] on the top of the stack, and increments [stackPointer] by 1.
   int push(int value) => stack[++stackPointer] = value;
-}
 
-/// This class serves as the interface for instructions. Instruction objects
-/// encode an opcode (through their [runtimeType]) and the constant arguments
-/// required by this opcode. Instruction objects are immutable.
-abstract class Instruction {
-  /// Executes this instruction on [vm], modifying its stack, heap, and/or
-  /// registers.
-  void execute(VM vm);
-}
+  /// Replaces the current top of the stack with [value].
+  int replace(int value) => stack[stackPointer] = value;
 
-/// Pushes [value] onto the stack.
-class LoadConstantInstruction implements Instruction {
-  LoadConstantInstruction(this.value);
-  final int value;
-
-  @override
-  void execute(VM vm) => vm.push(value);
-  @override
-  String toString() => 'loadc $value';
-}
-
-/// Sets the program counter to [target].
-class JumpInstruction implements Instruction {
-  JumpInstruction(this.target);
-  final String target;
-
-  @override
-  void execute(VM vm) => vm.programCounter = vm.labelAddresses[target] ??
-      (throw StateError('Label `$target` is not declared in this program'));
-  @override
-  String toString() => 'jump $target';
-}
-
-/// Sets the program counter to [target] if the top stack value is 0.
-class JumpIfZeroInstruction implements Instruction {
-  JumpIfZeroInstruction(this.target);
-  final String target;
-
-  @override
-  void execute(VM vm) {
-    if (vm.pop() == 0) {
-      vm.programCounter = vm.labelAddresses[target] ??
-          (throw StateError('Label `$target` is not declared in this program'));
-    }
+  /// Pushes [object] onto the heap and returns its address.
+  int allocate(TaggedObject object) {
+    final address = nextHeapAddress;
+    heap[address] = object;
+    return address;
   }
-
-  @override
-  String toString() => 'jumpz $target';
 }
 
-class AddInstruction implements Instruction {
-  const AddInstruction();
-  @override
-  void execute(VM vm) => vm.push(vm.pop() + vm.pop());
-  @override
-  String toString() => 'add';
-}
+/// Thrown by [Instruction]s if they encounter an invalid situation, for example
+/// if a dereferenced pointer doesn't point to a [TaggedObject] of the correct
+/// type.
+class VmRuntimeException implements Exception {
+  const VmRuntimeException(this.message);
 
-class SubtractInstruction implements Instruction {
-  const SubtractInstruction();
-  @override
-  void execute(VM vm) => vm.push(vm.pop() + vm.pop());
-  @override
-  String toString() => 'sub';
-}
-
-class HaltInstruction implements Instruction {
-  const HaltInstruction();
-  @override
-  void execute(VM vm) =>
-      throw UnsupportedError('`halt` instruction cannot be executed');
-  @override
-  String toString() => 'halt';
+  final String message;
 }
