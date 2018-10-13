@@ -1,6 +1,8 @@
 function call implementation variants for functional languages
 ==============================================================
 
+[![Build Status](https://travis-ci.com/pschiffmann/bachelors-thesis.svg?branch=master)](https://travis-ci.com/pschiffmann/bachelors-thesis)
+
 Building the web application
 ----------------------------
 
