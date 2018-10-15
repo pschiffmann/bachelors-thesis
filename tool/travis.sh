@@ -1,5 +1,5 @@
 #!/bin/bash
-# Created with package:mono_repo v1.2.1-dev
+# Created with package:mono_repo v1.2.1
 
 if [ -z "$PKG" ]; then
   echo -e '\033[31mPKG environment variable must be set!\033[0m'
@@ -28,6 +28,11 @@ while (( "$#" )); do
     echo -e '\033[1mTASK: command_1\033[22m'
     echo -e 'pub run build_runner test'
     pub run build_runner test || EXIT_CODE=$?
+    ;;
+  command_2) echo
+    echo -e '\033[1mTASK: command_2\033[22m'
+    echo -e 'pub run webdev build'
+    pub run webdev build || EXIT_CODE=$?
     ;;
   dartanalyzer) echo
     echo -e '\033[1mTASK: dartanalyzer\033[22m'

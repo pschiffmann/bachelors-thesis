@@ -1,16 +1,21 @@
-# Created with package:mono_repo v1.2.1-dev
+# Created with package:mono_repo v1.2.1
 language: dart
+
+# Custom configuration
+deploy:
+  provider: pages
+  "local-dir": fvm/build
+  "skip-cleanup": true
+  "github-token": $GITHUB_TOKEN
+  "keep-history": true
+  on:
+    branch: master
 
 jobs:
   include:
     - stage: static_analysis
-      name: "SDK: stable - DIR: fvm - TASKS: dartanalyzer --fatal-infos --fatal-warnings ."
-      script: ./tool/travis.sh dartanalyzer
-      env: PKG="fvm"
-      dart: stable
-    - stage: static_analysis
-      name: "SDK: stable - DIR: fvm - TASKS: dartfmt --fix -n --set-exit-if-changed ."
-      script: ./tool/travis.sh command_0
+      name: "SDK: stable - DIR: fvm - TASKS: [dartanalyzer --fatal-infos --fatal-warnings ., dartfmt --fix -n --set-exit-if-changed .]"
+      script: ./tool/travis.sh dartanalyzer command_0
       env: PKG="fvm"
       dart: stable
     - stage: unit_test
@@ -18,10 +23,16 @@ jobs:
       script: ./tool/travis.sh command_1
       env: PKG="fvm"
       dart: stable
+    - stage: build_webapp
+      name: "SDK: stable - DIR: fvm - TASKS: pub run webdev build"
+      script: ./tool/travis.sh command_2
+      env: PKG="fvm"
+      dart: stable
 
 stages:
   - static_analysis
   - unit_test
+  - build_webapp
 
 # Only building master means that we don't run two builds for each pull request.
 branches:
