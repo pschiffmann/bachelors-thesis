@@ -1,33 +1,30 @@
-# Created with package:mono_repo v1.2.1
 language: dart
-
-# Custom configuration
-deploy:
-  provider: pages
-  "local-dir": fvm/build
-  "skip-cleanup": true
-  "github-token": $GITHUB_TOKEN
-  "keep-history": true
-  on:
-    branch: master
+dart:
+- stable
 
 jobs:
   include:
     - stage: static_analysis
-      name: "SDK: stable - DIR: fvm - TASKS: [dartanalyzer --fatal-infos --fatal-warnings ., dartfmt --fix -n --set-exit-if-changed .]"
-      script: ./tool/travis.sh dartanalyzer command_0
-      env: PKG="fvm"
-      dart: stable
+      name: dartfmt
+      script: dartfmt --fix -n --set-exit-if-changed .
+    - name: dartanalyzer
+      script: dartanalyzer --fatal-infos --fatal-warnings .
+
     - stage: unit_test
-      name: "SDK: stable - DIR: fvm - TASKS: pub run build_runner test"
-      script: ./tool/travis.sh command_1
-      env: PKG="fvm"
-      dart: stable
+      name: build_runner test
+      script: pub run build_runner test
+
     - stage: build_webapp
-      name: "SDK: stable - DIR: fvm - TASKS: pub run webdev build"
-      script: ./tool/travis.sh command_2
-      env: PKG="fvm"
-      dart: stable
+      name: webdev build & deploy
+      script: pub run webdev build
+      deploy:
+        provider: pages
+        "local-dir": fvm/build
+        "skip-cleanup": true
+        "github-token": $GITHUB_TOKEN
+        "keep-history": true
+        on:
+          branch: master
 
 stages:
   - static_analysis
@@ -41,5 +38,5 @@ branches:
 
 cache:
   directories:
-    - "$HOME/.pub-cache"
-    - fvm/.dart_tool/build
+    - $HOME/.pub-cache
+    - .dart_tool/build

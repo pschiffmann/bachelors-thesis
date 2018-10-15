@@ -1,9 +1,0 @@
-travis:
-  deploy:
-    provider: pages
-    local-dir: fvm/build
-    skip-cleanup: true
-    github-token: $GITHUB_TOKEN
-    keep-history: true
-    on:
-      branch: master
