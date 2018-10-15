@@ -1,3 +1,4 @@
+# https://docs.travis-ci.com/user/languages/dart
 language: dart
 dart:
 - stable
@@ -19,7 +20,7 @@ jobs:
       script: pub run webdev build
       deploy:
         provider: pages
-        "local-dir": fvm/build
+        "local-dir": build
         "skip-cleanup": true
         "github-token": $GITHUB_TOKEN
         "keep-history": true
