@@ -9,10 +9,12 @@ jobs:
       script: dartfmt --fix -n --set-exit-if-changed .
     - name: dartanalyzer
       script: dartanalyzer --fatal-infos --fatal-warnings .
+
     - stage: unit_test
       name: build_runner test
       script: pub run build_runner test
-    - stage: gh-pages deploy
+
+    - stage: build_webapp
       name: webdev build & deploy
       script: pub run webdev build
       deploy:
@@ -37,4 +39,4 @@ branches:
 cache:
   directories:
     - $HOME/.pub-cache
-    - fvm/.dart_tool/build
+    - .dart_tool/build
