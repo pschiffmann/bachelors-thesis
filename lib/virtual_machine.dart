@@ -32,10 +32,22 @@ class VM {
   /// Stores heap-allocated objects. The keys are the addresses.
   final Map<int, TaggedObject> heap = {};
 
+  /// Stores the address of the instruction in [program] that will be executed
+  /// by [executeCurrentInstruction].
   int programCounter = 0;
+
+  /// Points to the top value in [stack].
   int stackPointer = -1;
+
+  /// Points to the top function argument of the current call frame.
   int stackPointer0 = -1;
+
+  /// Points to the top organizatorial cell of the last stored call frame in
+  /// [stack].
   int framePointer = -1;
+
+  /// Points to the address in [heap] of the current global vector (as an
+  /// [TaggedReferenceList]).
   int globalPointer = -1;
 
   /// Returns highest address in [heap] at which no object is allocated.
@@ -65,7 +77,7 @@ class VM {
   /// Returns the value from the top of [stack] without changing [stackPointer].
   int peek() => stack[stackPointer];
 
-  /// Puts [value] on the top of the stack, and increments [stackPointer] by 1.
+  /// Increments [stackPointer] by 1, then stores [value] at that address.
   int push(int value) => stack[++stackPointer] = value;
 
   /// Replaces the current top of the stack with [value].

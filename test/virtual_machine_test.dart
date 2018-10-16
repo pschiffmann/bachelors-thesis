@@ -66,6 +66,7 @@ void main() {
     const maxAddress = 31;
     VM vm;
     setUp(() => vm = VM(const [], const {}, maxAddress: maxAddress));
+    void pushAll(VM vm, List<int> values) => values.forEach(vm.push);
 
     test('`loadc` pushes a value on the stack', () {
       LoadConstantInstruction(4).execute(vm);
@@ -206,6 +207,38 @@ void main() {
       });
     });
 
+    group('`slide', () {
+      test('0 5` does nothing', () {
+        final stackBefore = vm.stack.toList();
+        SlideInstruction(0, 5).execute(vm);
+        expect(vm.stackPointer, equals(-1));
+        expect(vm.stack, equals(stackBefore));
+      });
+
+      test('3 0` reduces the stack pointer by 3', () {
+        pushAll(vm, [1, 2, 3, 4]);
+        final stackBefore = vm.stack.toList();
+        SlideInstruction(3, 0).execute(vm);
+        expect(vm.stackPointer, equals(0));
+        expect(vm.stack, equals(stackBefore));
+      });
+
+      test('5 2` moves the 2 top stack values down by 5 cells', () {
+        pushAll(vm, [10, 11, 12, 13, 14, 15, 16, 17]);
+        SlideInstruction(5, 2).execute(vm);
+        expect(
+            vm.stack.sublist(0, 8), equals([10, 16, 17, 13, 14, 15, 16, 17]));
+        expect(vm.stackPointer, equals(2));
+      });
+
+      test('1 3` moves the 3 top stack values down by 1 cell', () {
+        pushAll(vm, [7, 8, 9, 10, 11, 12]);
+        SlideInstruction(1, 3).execute(vm);
+        expect(vm.stackPointer, equals(4));
+        expect(vm.stack.sublist(0, 6), equals([7, 8, 10, 11, 12, 12]));
+      });
+    });
+
     test('`halt` throws an UnsupportedError', () {
       expect(() => const HaltInstruction().execute(vm), throwsUnsupportedError);
     });
@@ -219,7 +252,7 @@ void main() {
     });
 
     test('`mkV` wraps the top n stack values in a `TaggedReferenceList`', () {
-      vm..push(2)..push(4)..push(6)..push(8);
+      pushAll(vm, [2, 4, 6, 8]);
       AllocateTaggedReferenceListInstruction(3).execute(vm);
       expect(vm.stackPointer, equals(1));
       expect(vm.peek(), equals(maxAddress));
