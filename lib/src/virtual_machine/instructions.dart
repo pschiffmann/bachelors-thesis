@@ -180,6 +180,33 @@ class NotInstruction implements Instruction {
   String toString() => 'not';
 }
 
+class SlideInstruction implements Instruction {
+  SlideInstruction(this.shiftAmount, this.elementCount) {
+    if (shiftAmount < 0 || elementCount < 0) {
+      throw ArgumentError('Both arguments must be non-negative');
+    }
+  }
+
+  final int shiftAmount;
+  final int elementCount;
+
+  @override
+  void execute(VM vm) {
+    if (shiftAmount == 0) {
+      return;
+    }
+    final currentStart = vm.stackPointer - (elementCount - 1);
+    final newStart = vm.stackPointer - (shiftAmount + elementCount - 1);
+    for (var i = 0; i < elementCount; i++) {
+      vm.stack[newStart + i] = vm.stack[currentStart + i];
+    }
+    vm.stackPointer = newStart + elementCount - 1;
+  }
+
+  @override
+  String toString() => 'slide ';
+}
+
 class HaltInstruction implements Instruction {
   const HaltInstruction();
   @override
