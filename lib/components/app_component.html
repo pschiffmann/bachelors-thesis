@@ -10,9 +10,12 @@
   </div>
 </div>
 
-<div id="program">
+<div id="program"
+     [ngSwitch]="mode">
   <h2>program memory</h2>
-  <div class="memory-block">
+
+  <div *ngSwitchCase="executionMode"
+       class="memory-block">
     <pre>
       <span *ngFor="let instruction of vm.program; let i = index"
             class="instruction-cell">
@@ -22,15 +25,38 @@
       </span>
     </pre>
   </div>
-</div>
+  <div *ngSwitchCase="editingMode">
+    <pre>
+      <textarea
+                [(ngModel)]="editorInput"></textarea>
+    </pre>
+    <ul>
+      <li class="error"
+          *ngFor="let error of parseErrors">{{error}}</li>
+    </ul>
+  </div>
 
-<div>
-  <material-button raised
-                   (trigger)="executeSingleInstruction()">
-    <material-icon icon="skip_next"></material-icon>
-  </material-button>
-  <material-button raised
-                   (trigger)="initializeDemoVM()">
-    <material-icon icon="replay"></material-icon>
-  </material-button>
+  <div>
+    <material-button raised
+                     [disabled]="mode != executionMode"
+                     (trigger)="executeSingleInstruction()">
+      <material-icon icon="skip_next"></material-icon>
+    </material-button>
+    <material-button raised
+                     [disabled]="mode != executionMode"
+                     (trigger)="initializeVM()">
+      <material-icon icon="replay"></material-icon>
+    </material-button>
+
+    <material-button *ngSwitchCase="executionMode"
+                     raised
+                     (trigger)="activateEditingMode()">
+      <material-icon icon="create"></material-icon>
+    </material-button>
+    <material-button *ngSwitchCase="editingMode"
+                     raised
+                     (trigger)="activateExecutionMode()">
+      <material-icon icon="save"></material-icon>
+    </material-button>
+  </div>
 </div>
