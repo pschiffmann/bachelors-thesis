@@ -3,10 +3,12 @@ function call implementation variants for functional languages
 
 [![Build Status](https://travis-ci.com/pschiffmann/bachelors-thesis.svg?branch=master)](https://travis-ci.com/pschiffmann/bachelors-thesis)
 
-Building the web application
-----------------------------
+This repository contains an application that I use to demonstrate my results, or to test out ideas. It is written in Dart and runs in a web browser, completely client side. The latest stable version is hosted [here](https://pschiffmann.github.io/bachelors-thesis/).
 
-This repository contains an application that I use to demonstrate my results, or to test out ideas. It is written in Dart and runs in a web browser, completely client side. To build it locally, you need to
+Building the web application locally
+------------------------------------
+
+To build the app locally, you need to
 
  1. Install the [Dart 2 SDK](https://webdev.dartlang.org/tools/sdk#install)
  2. [Clone](https://services.github.com/on-demand/github-cli/clone-repo-cli) this repository
