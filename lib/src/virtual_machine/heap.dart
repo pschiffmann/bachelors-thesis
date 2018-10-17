@@ -17,9 +17,9 @@ class TaggedInt implements TaggedObject {
   int get sizeInCells => 2;
 }
 
-class TaggedReferenceList implements TaggedObject {
-  TaggedReferenceList(this.values);
-  const TaggedReferenceList.empty() : values = const [];
+class TaggedList implements TaggedObject {
+  TaggedList(this.values);
+  const TaggedList.empty() : values = const [];
 
   final List<int> values;
   int get length => values.length;

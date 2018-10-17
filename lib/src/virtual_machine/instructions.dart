@@ -216,6 +216,61 @@ class HaltInstruction implements Instruction {
   String toString() => 'halt';
 }
 
+class PushLocalInstruction implements Instruction {
+  PushLocalInstruction(this.offset);
+  final int offset;
+  @override
+  void execute(VM vm) => vm.push(vm.stack[vm.stackPointer0 + offset]);
+  @override
+  String toString() => 'pushL $offset';
+}
+
+class PushGlobalInstruction implements Instruction {
+  PushGlobalInstruction(this.offset);
+  final int offset;
+  @override
+  void execute(VM vm) => vm.push(vm.globalVector.values[offset]);
+  @override
+  String toString() => 'pushG $offset';
+}
+
+class UnwrapTaggedIntInstruction implements Instruction {
+  const UnwrapTaggedIntInstruction();
+  @override
+  void execute(VM vm) {
+    final obj = vm.heap[vm.peek()];
+    if (obj is TaggedInt) {
+      vm.replace(obj.value);
+    } else {
+      throw const VmRuntimeException('no B-object!');
+    }
+  }
+
+  @override
+  String toString() => 'getB';
+}
+
+class UnwrapTaggedListInstruction implements Instruction {
+  UnwrapTaggedListInstruction(this.length);
+  final int length;
+  @override
+  void execute(VM vm) {
+    final obj = vm.heap[vm.peek()];
+    if (obj is TaggedList) {
+      if (obj.length < length) {
+        throw const VmRuntimeException('Too few elements in global vector');
+      }
+      vm.stack.setRange(vm.stackPointer, vm.stackPointer + length, obj.values);
+      vm.stackPointer += length - 1;
+    } else {
+      throw const VmRuntimeException('no V-object!');
+    }
+  }
+
+  @override
+  String toString() => 'getV';
+}
+
 class AllocateTaggedIntInstruction implements Instruction {
   const AllocateTaggedIntInstruction();
   @override
@@ -224,8 +279,8 @@ class AllocateTaggedIntInstruction implements Instruction {
   String toString() => 'mkB';
 }
 
-class AllocateTaggedReferenceListInstruction implements Instruction {
-  AllocateTaggedReferenceListInstruction(this.length);
+class AllocateTaggedListInstruction implements Instruction {
+  AllocateTaggedListInstruction(this.length);
   final int length;
 
   @override
@@ -234,7 +289,7 @@ class AllocateTaggedReferenceListInstruction implements Instruction {
         vm.stack.sublist(vm.stackPointer - length + 1, vm.stackPointer + 1);
     vm
       ..stackPointer -= length
-      ..push(vm.allocate(TaggedReferenceList(references)));
+      ..push(vm.allocate(TaggedList(references)));
   }
 
   @override
@@ -248,7 +303,7 @@ class AllocateTaggedFunctionInstruction implements Instruction {
   @override
   void execute(VM vm) {
     final globalVector = vm.pop();
-    final argumentVector = vm.allocate(const TaggedReferenceList.empty());
+    final argumentVector = vm.allocate(const TaggedList.empty());
     vm.push(vm
         .allocate(TaggedFunction(functionLabel, globalVector, argumentVector)));
   }
