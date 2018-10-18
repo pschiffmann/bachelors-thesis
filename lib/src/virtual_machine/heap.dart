@@ -1,5 +1,12 @@
 part of fvm.virtual_machine;
 
+const abbreviations = {
+  TaggedInt: 'T',
+  TaggedList: 'V',
+  TaggedFunction: 'F',
+  TaggedClosure: 'C'
+};
+
 /// Represents an object that can be stored on the [VM.heap].
 abstract class TaggedObject {
   String get tag;

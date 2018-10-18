@@ -361,3 +361,42 @@ class MarkProgramCounterInstruction implements Instruction {
   @override
   String toString() => 'markpc';
 }
+
+class Apply1Instruction implements Instruction {
+  const Apply1Instruction();
+  @override
+  void execute(VM vm) {
+    final fAddress = vm.pop();
+    final fObj = vm.dereferenceAs<TaggedFunction>(fAddress);
+    final args = vm.dereferenceAs<TaggedList>(fObj.argumentVectorAddress);
+    vm
+      ..pushAll(args.values)
+      ..push(fAddress);
+  }
+
+  @override
+  String toString() => 'apply1';
+}
+
+class Apply0Instruction implements Instruction {
+  const Apply0Instruction();
+  @override
+  void execute(VM vm) {
+    final address = vm.pop();
+    final obj = vm.heap[address];
+    if (obj is TaggedFunction) {
+      vm
+        ..globalPointer = obj.globalVectorAddress
+        ..programCounter = vm.lookupLabel(obj.functionLabel);
+    } else if (obj is TaggedClosure) {
+      vm
+        ..globalPointer = obj.globalVectorAddress
+        ..programCounter = vm.lookupLabel(obj.expressionLabel);
+    } else {
+      throw VmRuntimeException('No C-oject or F-object at $address');
+    }
+  }
+
+  @override
+  String toString() => 'apply0';
+}

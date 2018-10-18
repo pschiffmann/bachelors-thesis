@@ -85,11 +85,24 @@ class VM {
   /// by 1.
   int pop() => stack[stackPointer--];
 
+  /// Returns the `count` top stack values. The current top value will be placed
+  /// at the last position in the result list.
+  List<int> popAll(int count) {
+    stackPointer -= count;
+    return stack.sublist(stackPointer + 1, stackPointer + count + 1);
+  }
+
   /// Returns the value from the top of [stack] without changing [stackPointer].
   int peek() => stack[stackPointer];
 
   /// Increments [stackPointer] by 1, then stores [value] at that address.
-  int push(int value) => stack[++stackPointer] = value;
+  void push(int value) => stack[++stackPointer] = value;
+
+  /// Pushes all `values` onto the stack. Shorthand for `values.forEach(push)`.
+  void pushAll(List<int> values) {
+    stack.setRange(stackPointer + 1, stackPointer + values.length + 1, values);
+    stackPointer += values.length;
+  }
 
   /// Replaces the current top of the stack with [value].
   int replace(int value) => stack[stackPointer] = value;
@@ -99,6 +112,16 @@ class VM {
     final address = nextHeapAddress;
     heap[address] = object;
     return address;
+  }
+
+  /// Returns the [TaggedObject] at heap address [address], or throws a
+  /// [VmRuntimeException] if the address doesn't reference a [T].
+  T dereferenceAs<T extends TaggedObject>(int address) {
+    final obj = heap[address];
+    if (obj is T) {
+      return obj;
+    }
+    throw VmRuntimeException('No ${abbreviations[T]}-object at $address');
   }
 
   /// Returns the address into [program] of the [Instruction] associated with
@@ -115,4 +138,7 @@ class VmRuntimeException implements Exception {
   const VmRuntimeException(this.message);
 
   final String message;
+
+  @override
+  String toString() => message;
 }
