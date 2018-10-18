@@ -47,8 +47,18 @@ class VM {
   int framePointer = -1;
 
   /// Points to the address in [heap] of the current global vector (as an
-  /// [TaggedReferenceList]).
+  /// [TaggedList]).
   int globalPointer = -1;
+
+  TaggedList get globalVector {
+    final obj = heap[globalPointer];
+    if (obj is TaggedList) {
+      return obj;
+    } else {
+      throw const VmRuntimeException(
+          "global pointer doesn't point to a V-object");
+    }
+  }
 
   /// Returns highest address in [heap] at which no object is allocated.
   int get nextHeapAddress =>

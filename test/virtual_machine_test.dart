@@ -2,6 +2,9 @@ import 'package:fvm/virtual_machine.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
+final throwsVmRuntimeException =
+    throwsA(const TypeMatcher<VmRuntimeException>());
+
 class MockInstruction extends Mock implements Instruction {}
 
 void main() {
@@ -251,12 +254,12 @@ void main() {
       expect((vm.heap[maxAddress] as TaggedInt).value, 23);
     });
 
-    test('`mkV` wraps the top n stack values in a `TaggedReferenceList`', () {
+    test('`mkV` wraps the top n stack values in a `TaggedList`', () {
       pushAll(vm, [2, 4, 6, 8]);
-      AllocateTaggedReferenceListInstruction(3).execute(vm);
+      AllocateTaggedListInstruction(3).execute(vm);
       expect(vm.stackPointer, equals(1));
       expect(vm.peek(), equals(maxAddress));
-      final refList = vm.heap[maxAddress] as TaggedReferenceList;
+      final refList = vm.heap[maxAddress] as TaggedList;
       expect(refList.values, equals([4, 6, 8]));
     });
 
@@ -265,7 +268,7 @@ void main() {
       vm.push(12);
       AllocateTaggedFunctionInstruction('E').execute(vm);
 
-      final argVector = vm.heap[maxAddress] as TaggedReferenceList;
+      final argVector = vm.heap[maxAddress] as TaggedList;
       expect(argVector.length, 0);
 
       final taggedFunction = vm.heap[maxAddress - 2] as TaggedFunction;
@@ -288,6 +291,70 @@ void main() {
 
       expect(vm.stackPointer, equals(0));
       expect(vm.peek(), equals(maxAddress));
+    });
+
+    test('`pushL` pushes a value relative to SP0 onto the stack', () {
+      vm
+        ..push(2)
+        ..push(3)
+        ..push(4)
+        ..stackPointer0 = 1
+        ..stackPointer = 5;
+      PushLocalInstruction(0).execute(vm);
+      expect(vm.stackPointer, equals(6));
+      expect(vm.peek(), equals(3));
+      PushLocalInstruction(1).execute(vm);
+      expect(vm.stackPointer, equals(7));
+      expect(vm.peek(), equals(4));
+    });
+
+    test('`pushG` pushes a value from the global vector onto the stack', () {
+      vm
+        ..allocate(TaggedList([20, 30]))
+        ..globalPointer = maxAddress;
+      PushGlobalInstruction(1).execute(vm);
+      expect(vm.stackPointer, equals(0));
+      expect(vm.peek(), equals(30));
+    });
+
+    group('`getB`', () {
+      test('dereferences a pointer to a `TaggedInt`', () {
+        vm
+          ..allocate(TaggedInt(3))
+          ..push(maxAddress);
+        const UnwrapTaggedIntInstruction().execute(vm);
+        expect(vm.peek(), equals(3));
+      });
+
+      test("throws if the top stack cell doesn't point to a `TaggedInt`", () {
+        vm..push(maxAddress);
+        expect(() => const UnwrapTaggedIntInstruction().execute(vm),
+            throwsVmRuntimeException);
+      });
+    });
+
+    group('`getV`', () {
+      setUp(() => vm..allocate(TaggedList([4, 6, 8, 10])));
+
+      test('loads `length` elements from the `TaggedList` onto the stack', () {
+        vm.push(maxAddress);
+        UnwrapTaggedListInstruction(3).execute(vm);
+        expect(vm.stackPointer, equals(2));
+        expect(vm.stack.sublist(0, 3), equals([4, 6, 8]));
+      });
+
+      test("throws if the top stack cell doesn't point to a `TaggedList`", () {
+        vm.push(1);
+        expect(() => UnwrapTaggedListInstruction(3).execute(vm),
+            throwsVmRuntimeException);
+      });
+
+      test('throws if the `TaggedList` contains less than `length` elements',
+          () {
+        vm.push(maxAddress);
+        expect(() => UnwrapTaggedListInstruction(5).execute(vm),
+            throwsVmRuntimeException);
+      });
     });
   });
 }
