@@ -26,8 +26,7 @@ class JumpInstruction implements Instruction {
   final String target;
 
   @override
-  void execute(VM vm) => vm.programCounter = vm.labelAddresses[target] ??
-      (throw StateError('Label `$target` is not declared in this program'));
+  void execute(VM vm) => vm.programCounter = vm.lookupLabel(target);
   @override
   String toString() => 'jump $target';
 }
@@ -40,8 +39,7 @@ class JumpIfZeroInstruction implements Instruction {
   @override
   void execute(VM vm) {
     if (vm.pop() == 0) {
-      vm.programCounter = vm.labelAddresses[target] ??
-          (throw StateError('Label `$target` is not declared in this program'));
+      vm.programCounter = vm.lookupLabel(target);
     }
   }
 
@@ -320,4 +318,46 @@ class AllocateTaggedClosureInstruction implements Instruction {
       vm.push(vm.allocate(TaggedClosure(expressionLabel, vm.pop())));
   @override
   String toString() => 'mkC $expressionLabel';
+}
+
+class SetStackPointer0Instruction implements Instruction {
+  const SetStackPointer0Instruction();
+  @override
+  void execute(VM vm) => vm.stackPointer0 = vm.stackPointer;
+  @override
+  String toString() => 'setSP0';
+}
+
+class MarkInstruction implements Instruction {
+  MarkInstruction(this.returnLabel);
+  final String returnLabel;
+  @override
+  void execute(VM vm) {
+    final returnAddress = vm.lookupLabel(returnLabel);
+    vm
+      ..push(vm.stackPointer0)
+      ..push(vm.globalPointer)
+      ..push(vm.framePointer)
+      ..push(returnAddress)
+      ..framePointer = vm.stackPointer;
+  }
+
+  @override
+  String toString() => 'mark $returnLabel';
+}
+
+class MarkProgramCounterInstruction implements Instruction {
+  const MarkProgramCounterInstruction();
+  @override
+  void execute(VM vm) {
+    vm
+      ..push(vm.stackPointer0)
+      ..push(vm.globalPointer)
+      ..push(vm.framePointer)
+      ..push(vm.programCounter)
+      ..framePointer = vm.stackPointer;
+  }
+
+  @override
+  String toString() => 'markpc';
 }

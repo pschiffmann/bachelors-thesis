@@ -33,21 +33,22 @@ class VM {
   final Map<int, TaggedObject> heap = {};
 
   /// Stores the address of the instruction in [program] that will be executed
-  /// by [executeCurrentInstruction].
+  /// by [executeCurrentInstruction]; abbreviated to `PC`.
   int programCounter = 0;
 
-  /// Points to the top value in [stack].
+  /// Points to the top value in [stack]; abbreviated to `SP`.
   int stackPointer = -1;
 
-  /// Points to the top function argument of the current call frame.
+  /// Points to the top function argument of the current call frame; abbreviated
+  /// to `SP0`.
   int stackPointer0 = -1;
 
   /// Points to the top organizatorial cell of the last stored call frame in
-  /// [stack].
+  /// [stack]; abbreviated to `FP`.
   int framePointer = -1;
 
   /// Points to the address in [heap] of the current global vector (as an
-  /// [TaggedList]).
+  /// [TaggedList]); abbreviated to `GP`.
   int globalPointer = -1;
 
   TaggedList get globalVector {
@@ -99,6 +100,12 @@ class VM {
     heap[address] = object;
     return address;
   }
+
+  /// Returns the address into [program] of the [Instruction] associated with
+  /// [label]. Throws a [VmRuntimeException] if [label] is not defined.
+  int lookupLabel(String label) =>
+      labelAddresses[label] ??
+      (throw VmRuntimeException('Undefined label `$label`'));
 }
 
 /// Thrown by [Instruction]s if they encounter an invalid situation, for example
