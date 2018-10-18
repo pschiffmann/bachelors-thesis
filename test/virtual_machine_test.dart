@@ -355,6 +355,38 @@ void main() {
         expect(() => UnwrapTaggedListInstruction(5).execute(vm),
             throwsVmRuntimeException);
       });
+
+      test('`setSP0` sets SP0 to the value in SP', () {
+        vm.stackPointer = 4;
+        const SetStackPointer0Instruction().execute(vm);
+        expect(vm.stackPointer0, equals(4));
+      });
+
+      test(
+          '`mark` stores the register contents and return address on the stack',
+          () {
+        final vm = VM(const [], const {'T': 40})
+          ..stackPointer = 5
+          ..stackPointer0 = 12
+          ..globalPointer = 13
+          ..framePointer = 14;
+        MarkInstruction('T').execute(vm);
+        expect(vm.stackPointer, equals(9));
+        expect(vm.framePointer, equals(9));
+        expect(vm.stack.sublist(6, 10), equals([12, 13, 14, 40]));
+      });
+
+      test('`markpc` stores the register contents on the stack', () {
+        vm
+          ..stackPointer0 = 20
+          ..globalPointer = 30
+          ..framePointer = 40
+          ..programCounter = 50;
+        const MarkProgramCounterInstruction().execute(vm);
+        expect(vm.stackPointer, equals(3));
+        expect(vm.framePointer, equals(3));
+        expect(vm.stack.sublist(0, 4), equals([20, 30, 40, 50]));
+      });
     });
   });
 }
