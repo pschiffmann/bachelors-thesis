@@ -5,36 +5,51 @@ import 'package:test/test.dart';
 final throwsVmRuntimeException =
     throwsA(const TypeMatcher<VmRuntimeException>());
 
+const maxAddress = 31;
+
 class MockInstruction extends Mock implements Instruction {}
 
 void main() {
   group('VM', () {
+    VM vm;
+    setUp(() => vm = VM(const [], const {}, maxAddress: maxAddress));
+
     test(
         '`push()` increases the stack pointer, '
         'and stores the assigned value at that address', () {
-      final vm = VM(const [], const {});
       expect(vm.stackPointer, equals(-1));
       vm.push(4);
       expect(vm.stackPointer, equals(0));
       expect(vm.stack[0], equals(4));
     });
 
+    test('`pushAll` places all elements on the stack', () {
+      vm.pushAll([3, 5, 7]);
+      expect(vm.stackPointer, equals(2));
+      expect(vm.stack.sublist(0, 3), [3, 5, 7]);
+    });
+
     test('`pop()` decreases the stack pointer without modifying the stack', () {
-      final vm = VM(const [], const {})
+      vm
         ..stack[0] = 3
         ..stack[1] = 12
         ..stack[2] = -44
         ..stackPointer = 2;
       final before = vm.stack.toList();
-      vm.pop();
+      expect(vm.pop(), equals(-44));
       expect(vm.stackPointer, equals(1));
       expect(vm.stack, orderedEquals(before));
+    });
+
+    test('`popAll` reduces the stack pointer and returns all elements', () {
+      vm.pushAll([2, 3, 4, 5]);
+      expect(vm.popAll(3), equals([3, 4, 5]));
+      expect(vm.stackPointer, equals(0));
     });
 
     test(
         '`allocate()` places an object at `vm.maxAddress` if the heap is empty',
         () {
-      final vm = VM(const [], const {}, maxAddress: 31);
       final obj = TaggedInt(4);
       final address = vm.allocate(obj);
       expect(address, equals(31));
@@ -44,7 +59,7 @@ void main() {
     test(
         '`allocate()` places an object at the next free address '
         'if the heap is not empty', () {
-      final vm = VM(const [], const {}, maxAddress: 31)..allocate(TaggedInt(1));
+      vm.allocate(TaggedInt(1));
       expect(vm.allocate(TaggedInt(4)), equals(29));
       expect(vm.allocate(TaggedInt(2)), equals(27));
     });
@@ -63,10 +78,25 @@ void main() {
       expect(vm.programCounter, equals(1));
       verify(i1.execute(vm)).called(1);
     });
+
+    group('`dereferenceAs`', () {
+      final obj = TaggedInt(8);
+      setUp(() => vm.allocate(obj));
+
+      test('returns the object at that address if it is of the correct type',
+          () {
+        expect(vm.dereferenceAs<TaggedInt>(maxAddress), equals(obj));
+      });
+
+      test("throws if the address doesn't point to a `T`", () {
+        expect(() => vm.dereferenceAs<TaggedList>(maxAddress),
+            throwsVmRuntimeException);
+        expect(() => vm.dereferenceAs<TaggedInt>(0), throwsVmRuntimeException);
+      });
+    });
   });
 
   group('instructions', () {
-    const maxAddress = 31;
     VM vm;
     setUp(() => vm = VM(const [], const {}, maxAddress: maxAddress));
     void pushAll(VM vm, List<int> values) => values.forEach(vm.push);
@@ -355,37 +385,68 @@ void main() {
         expect(() => UnwrapTaggedListInstruction(5).execute(vm),
             throwsVmRuntimeException);
       });
+    });
 
-      test('`setSP0` sets SP0 to the value in SP', () {
-        vm.stackPointer = 4;
-        const SetStackPointer0Instruction().execute(vm);
-        expect(vm.stackPointer0, equals(4));
+    test('`setSP0` sets SP0 to the value in SP', () {
+      vm.stackPointer = 4;
+      const SetStackPointer0Instruction().execute(vm);
+      expect(vm.stackPointer0, equals(4));
+    });
+
+    test('`mark` stores the register contents and return address on the stack',
+        () {
+      final vm = VM(const [], const {'T': 40})
+        ..stackPointer = 5
+        ..stackPointer0 = 12
+        ..globalPointer = 13
+        ..framePointer = 14;
+      MarkInstruction('T').execute(vm);
+      expect(vm.stackPointer, equals(9));
+      expect(vm.framePointer, equals(9));
+      expect(vm.stack.sublist(6, 10), equals([12, 13, 14, 40]));
+    });
+
+    test('`markpc` stores the register contents on the stack', () {
+      vm
+        ..stackPointer0 = 20
+        ..globalPointer = 30
+        ..framePointer = 40
+        ..programCounter = 50;
+      const MarkProgramCounterInstruction().execute(vm);
+      expect(vm.stackPointer, equals(3));
+      expect(vm.framePointer, equals(3));
+      expect(vm.stack.sublist(0, 4), equals([20, 30, 40, 50]));
+    });
+
+    test('`apply1` pushes the function arguments under the function address',
+        () {
+      final args = vm.allocate(TaggedList([5, 6, 7]));
+      final fAddress = vm.allocate(TaggedFunction('L', -1, args));
+      vm.push(fAddress);
+      const Apply1Instruction().execute(vm);
+      expect(vm.stackPointer, equals(3));
+      expect(vm.stack.sublist(0, 4), equals([5, 6, 7, fAddress]));
+    });
+
+    group('`apply0` sets the GP and PC from a', () {
+      VM vm;
+      setUp(() => vm = VM(const [], const {'T': 100}, maxAddress: 31)
+        ..push(maxAddress));
+
+      test('`TaggedFunction`', () {
+        vm.allocate(TaggedFunction('T', 10, 20));
+        const Apply0Instruction().execute(vm);
+        expect(vm.globalPointer, equals(10));
+        expect(vm.programCounter, equals(100));
+        expect(vm.stackPointer, equals(-1));
       });
 
-      test(
-          '`mark` stores the register contents and return address on the stack',
-          () {
-        final vm = VM(const [], const {'T': 40})
-          ..stackPointer = 5
-          ..stackPointer0 = 12
-          ..globalPointer = 13
-          ..framePointer = 14;
-        MarkInstruction('T').execute(vm);
-        expect(vm.stackPointer, equals(9));
-        expect(vm.framePointer, equals(9));
-        expect(vm.stack.sublist(6, 10), equals([12, 13, 14, 40]));
-      });
-
-      test('`markpc` stores the register contents on the stack', () {
-        vm
-          ..stackPointer0 = 20
-          ..globalPointer = 30
-          ..framePointer = 40
-          ..programCounter = 50;
-        const MarkProgramCounterInstruction().execute(vm);
-        expect(vm.stackPointer, equals(3));
-        expect(vm.framePointer, equals(3));
-        expect(vm.stack.sublist(0, 4), equals([20, 30, 40, 50]));
+      test('`TaggedClosure`', () {
+        vm.allocate(TaggedClosure('T', 10));
+        const Apply0Instruction().execute(vm);
+        expect(vm.globalPointer, equals(10));
+        expect(vm.programCounter, equals(100));
+        expect(vm.stackPointer, equals(-1));
       });
     });
   });
