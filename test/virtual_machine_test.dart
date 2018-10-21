@@ -449,5 +449,99 @@ void main() {
         expect(vm.stackPointer, equals(-1));
       });
     });
+
+    group('`testArg k`', () {
+      test(
+          'wraps the arguments in a new `TaggedFunction` '
+          'if too few arguments were provided', () {
+        vm
+          ..stackPointer = 4
+          ..framePointer = 4
+          ..pushAll([20, 19]);
+        TestArgumentCountInstruction(3).execute(vm);
+        final fObj = vm.dereferenceAs<TaggedFunction>(vm.peek());
+        final args = vm.dereferenceAs<TaggedList>(fObj.argumentVectorAddress);
+        expect(args.values, equals([20, 19]));
+      });
+
+      test('does nothing of at least k arguments were provided', () {
+        final numArgs = 2;
+        final stackBefore = vm.stack.toList();
+        vm
+          ..framePointer = 10
+          ..stackPointer = 10 + numArgs;
+        TestArgumentCountInstruction(numArgs).execute(vm);
+        expect(vm.stackPointer, equals(12));
+        expect(vm.framePointer, equals(10));
+        expect(vm.stack, equals(stackBefore));
+      });
+    });
+
+    test('`wrap` replaces the top stack cell with a `TaggedFunction`', () {
+      vm
+        ..programCounter = 4
+        ..globalPointer = 8
+        ..push(10);
+      const WrapInstruction().execute(vm);
+      expect(vm.stackPointer, equals(0));
+      expect(vm.peek(), equals(maxAddress));
+      final fObj = vm.dereferenceAs<TaggedFunction>(maxAddress);
+      expect(fObj.functionLabel, equals('3'));
+      expect(fObj.globalVectorAddress, 8);
+      expect(fObj.argumentVectorAddress, equals(10));
+    });
+
+    test(
+        '`popEnv` restores all registers from stack values '
+        'and shifts the top stack value', () {
+      vm
+        ..pushAll([5, 7, 9, 11, 30])
+        ..framePointer = 3;
+      const PopEnvironmentInstruction().execute(vm);
+      expect(vm.stackPointer, equals(0));
+      expect(vm.peek(), equals(30));
+      expect(vm.programCounter, equals(11));
+      expect(vm.framePointer, equals(9));
+      expect(vm.globalPointer, equals(7));
+      expect(vm.stackPointer0, equals(5));
+    });
+
+    test('`dummy n` places n `TaggedClosure`s on the stack', () {
+      final taggedClosureSize = 2;
+      DummyInstruction(3).execute(vm);
+      expect(vm.stackPointer, equals(2));
+      expect(
+          vm.stack.sublist(0, 3),
+          equals([
+            maxAddress,
+            maxAddress - taggedClosureSize,
+            maxAddress - 2 * taggedClosureSize
+          ]));
+      for (var i = 0; i < 3; i++) {
+        final cObj =
+            vm.heap[maxAddress - i * taggedClosureSize] as TaggedClosure;
+        expect(cObj.expressionLabel, equals('-1'));
+        expect(cObj.globalVectorAddress, equals(-1));
+      }
+    });
+
+    test('`rewrite j` copies a heap value to another heap address', () {
+      final c1 = TaggedClosure('-1', -1);
+      final c2 = TaggedClosure('real', 5);
+      final c1Addr = vm.allocate(c1);
+      final c2Addr = vm.allocate(c2);
+      vm.pushAll([c1Addr, c2Addr]);
+      RewriteInstruction(1).execute(vm);
+      expect(vm.stackPointer, equals(0));
+      expect(vm.heap[maxAddress], equals(c2));
+      expect(vm.heap[maxAddress - c2.sizeInCells], equals(c2));
+    });
+
+    test('`copyglob` pushes the current GP onto the stack', () {
+      vm.globalPointer = 4;
+      const CopyGlobalInstruction().execute(vm);
+      expect(vm.stackPointer, equals(0));
+      expect(vm.peek(), equals(4));
+    });
   });
 }
