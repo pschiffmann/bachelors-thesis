@@ -1,0 +1,28 @@
+.tagged-object {
+  border: 1px solid #000;
+}
+
+.memory-cell {
+  display: block;
+  background-color: lightgrey;
+  border: 1px solid grey;
+  width: 100px;
+  text-align: right;
+  line-height: 1.5rem;
+}
+
+.memory-cell::before {
+  counter-increment: line-number;
+  content: counter(line-number);
+  display: block;
+  border-right: 1px solid #ddd;
+  float: left;
+  width: 1.5em;
+  padding: 0 .5em;
+  margin-right: .5em;
+  color: #888;
+}
+
+.tag {
+  background-color: #f04cff;
+}
