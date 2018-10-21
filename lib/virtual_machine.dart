@@ -125,9 +125,18 @@ class VM {
   }
 
   /// Returns the address into [program] of the [Instruction] associated with
-  /// [label]. Throws a [VmRuntimeException] if [label] is not defined.
+  /// [label].
+  ///
+  /// If [label] is not defined, but can be parsed as an [int], returns that
+  /// value. This is necessary because [WrapInstruction] creates
+  /// [TaggedFunction]s that contain an integer jump target, rather than a
+  /// label.
+  ///
+  /// Throws a [VmRuntimeException] if [label] is not defined and can't be
+  /// parsed as an [int].
   int lookupLabel(String label) =>
       labelAddresses[label] ??
+      int.tryParse(label) ??
       (throw VmRuntimeException('Undefined label `$label`'));
 }
 

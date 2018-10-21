@@ -202,7 +202,7 @@ class SlideInstruction implements Instruction {
   }
 
   @override
-  String toString() => 'slide ';
+  String toString() => 'slide $shiftAmount $elementCount';
 }
 
 class HaltInstruction implements Instruction {
@@ -251,22 +251,20 @@ class UnwrapTaggedIntInstruction implements Instruction {
 class UnwrapTaggedListInstruction implements Instruction {
   UnwrapTaggedListInstruction(this.length);
   final int length;
+
   @override
   void execute(VM vm) {
-    final obj = vm.heap[vm.peek()];
-    if (obj is TaggedList) {
-      if (obj.length < length) {
-        throw const VmRuntimeException('Too few elements in global vector');
-      }
-      vm.stack.setRange(vm.stackPointer, vm.stackPointer + length, obj.values);
-      vm.stackPointer += length - 1;
-    } else {
-      throw const VmRuntimeException('no V-object!');
+    final address = vm.peek();
+    final list = vm.dereferenceAs<TaggedList>(address);
+    if (list.length < length) {
+      throw VmRuntimeException('Too few elements in L-object at $address');
     }
+    vm.stack.setRange(vm.stackPointer, vm.stackPointer + length, list.values);
+    vm.stackPointer += length - 1;
   }
 
   @override
-  String toString() => 'getV';
+  String toString() => 'getV $length';
 }
 
 class AllocateTaggedIntInstruction implements Instruction {
@@ -399,4 +397,166 @@ class Apply0Instruction implements Instruction {
 
   @override
   String toString() => 'apply0';
+}
+
+class ApplyInstruction implements Instruction {
+  const ApplyInstruction();
+  @override
+  void execute(VM vm) {
+    const Apply1Instruction().execute(vm);
+    const Apply0Instruction().execute(vm);
+  }
+
+  @override
+  String toString() => 'apply';
+}
+
+class TestArgumentCountInstruction implements Instruction {
+  TestArgumentCountInstruction(this.count);
+  final int count;
+  @override
+  void execute(VM vm) {
+    final actual = vm.stackPointer - vm.framePointer;
+    if (actual < count) {
+      AllocateTaggedListInstruction(actual).execute(vm);
+      const WrapInstruction().execute(vm);
+      const PopEnvironmentInstruction().execute(vm);
+    }
+  }
+
+  @override
+  String toString() => 'testArg $count';
+}
+
+class WrapInstruction implements Instruction {
+  const WrapInstruction();
+  @override
+  void execute(VM vm) {
+    vm.push(vm.allocate(TaggedFunction(
+        (vm.programCounter - 1).toString(), vm.globalPointer, vm.pop())));
+  }
+
+  @override
+  String toString() => 'wrap';
+}
+
+class PopEnvironmentInstruction implements Instruction {
+  const PopEnvironmentInstruction();
+
+  @override
+  void execute(VM vm) {
+    final result = vm.peek();
+    vm
+      ..stackPointer = vm.framePointer
+      ..programCounter = vm.pop()
+      ..framePointer = vm.pop()
+      ..globalPointer = vm.pop()
+      ..stackPointer0 = vm.pop()
+      ..push(result);
+  }
+
+  @override
+  String toString() => 'popEnv';
+}
+
+class ReturnInstruction implements Instruction {
+  ReturnInstruction(this.length);
+  final int length;
+
+  @override
+  void execute(VM vm) {
+    if (vm.stackPointer - vm.framePointer - 1 <= length) {
+      const PopEnvironmentInstruction().execute(vm);
+    } else {
+      SlideInstruction(length, 1).execute(vm);
+      const ApplyInstruction().execute(vm);
+    }
+  }
+
+  @override
+  String toString() => 'return $length';
+}
+
+class DummyInstruction implements Instruction {
+  DummyInstruction(this.length);
+  final int length;
+
+  @override
+  void execute(VM vm) {
+    for (var i = 0; i < length; i++) {
+      vm.push(vm.allocate(TaggedClosure('-1', -1)));
+    }
+  }
+
+  @override
+  String toString() => 'dummy $length';
+}
+
+class RewriteInstruction implements Instruction {
+  RewriteInstruction(this.difference);
+  final int difference;
+
+  @override
+  void execute(VM vm) {
+    final oldValueAddress = vm.stack[vm.stackPointer - difference];
+    final oldValue = vm.heap[oldValueAddress];
+    if (oldValue == null) {
+      throw VmRuntimeException(
+          'Nothing to replace at address $oldValueAddress');
+    }
+
+    final newValueAddress = vm.pop();
+    final newValue = vm.heap[newValueAddress];
+    if (newValue == null) {
+      throw VmRuntimeException('No tagged object at $newValueAddress');
+    }
+
+    if (oldValue.sizeInCells < newValue.sizeInCells) {
+      throw VmRuntimeException('Not enough space for a '
+          '${abbreviations[newValue.runtimeType]}-object at $oldValueAddress');
+    }
+
+    vm.heap[oldValueAddress] = newValue;
+  }
+
+  @override
+  String toString() => 'rewrite $difference';
+}
+
+class EvaluateInstruction implements Instruction {
+  const EvaluateInstruction();
+
+  @override
+  void execute(VM vm) {
+    final obj = vm.heap[vm.peek()];
+    if (obj is TaggedClosure) {
+      const MarkProgramCounterInstruction().execute(vm);
+      PushLocalInstruction(3).execute(vm);
+      const Apply0Instruction().execute(vm);
+    }
+  }
+
+  @override
+  String toString() => 'eval';
+}
+
+class UpdateInstruction implements Instruction {
+  const UpdateInstruction();
+
+  @override
+  void execute(VM vm) {
+    const PopEnvironmentInstruction().execute(vm);
+    RewriteInstruction(1).execute(vm);
+  }
+
+  @override
+  String toString() => 'update';
+}
+
+class CopyGlobalInstruction implements Instruction {
+  const CopyGlobalInstruction();
+  @override
+  void execute(VM vm) => vm.push(vm.globalPointer);
+  @override
+  String toString() => 'copyglob';
 }
