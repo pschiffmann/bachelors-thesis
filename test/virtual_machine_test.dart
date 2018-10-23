@@ -2,13 +2,14 @@ import 'package:fvm/virtual_machine.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
-final throwsVmRuntimeException =
-    throwsA(const TypeMatcher<VmRuntimeException>());
-
 const maxAddress = 31;
 
+final taggedIntSize = TaggedInt(null).sizeInCells;
 final taggedClosureSize = TaggedClosure(null, null).sizeInCells;
 final taggedFunctionSize = TaggedFunction(null, null, null).sizeInCells;
+
+final throwsVmRuntimeException =
+    throwsA(const TypeMatcher<VmRuntimeException>());
 
 class MockInstruction extends Mock implements Instruction {}
 
@@ -55,16 +56,16 @@ void main() {
         () {
       final obj = TaggedInt(4);
       final address = vm.allocate(obj);
-      expect(address, equals(31));
-      expect(vm.heap[31], equals(obj));
+      expect(address, equals(maxAddress));
+      expect(vm.heap[maxAddress], equals(obj));
     });
 
     test(
         '`allocate()` places an object at the next free address '
         'if the heap is not empty', () {
       vm.allocate(TaggedInt(1));
-      expect(vm.allocate(TaggedInt(4)), equals(29));
-      expect(vm.allocate(TaggedInt(2)), equals(27));
+      expect(vm.allocate(TaggedInt(4)), equals(maxAddress - taggedIntSize));
+      expect(vm.allocate(TaggedInt(2)), equals(maxAddress - 2 * taggedIntSize));
     });
 
     test(
@@ -102,7 +103,6 @@ void main() {
   group('instructions', () {
     VM vm;
     setUp(() => vm = VM(const [], const {}, maxAddress: maxAddress));
-    void pushAll(VM vm, List<int> values) => values.forEach(vm.push);
 
     test('`loadc` pushes a value on the stack', () {
       LoadConstantInstruction(4).execute(vm);
@@ -252,7 +252,7 @@ void main() {
       });
 
       test('3 0` reduces the stack pointer by 3', () {
-        pushAll(vm, [1, 2, 3, 4]);
+        vm.pushAll([1, 2, 3, 4]);
         final stackBefore = vm.stack.toList();
         SlideInstruction(3, 0).execute(vm);
         expect(vm.stackPointer, equals(0));
@@ -260,7 +260,7 @@ void main() {
       });
 
       test('5 2` moves the 2 top stack values down by 5 cells', () {
-        pushAll(vm, [10, 11, 12, 13, 14, 15, 16, 17]);
+        vm.pushAll([10, 11, 12, 13, 14, 15, 16, 17]);
         SlideInstruction(5, 2).execute(vm);
         expect(
             vm.stack.sublist(0, 8), equals([10, 16, 17, 13, 14, 15, 16, 17]));
@@ -268,7 +268,7 @@ void main() {
       });
 
       test('1 3` moves the 3 top stack values down by 1 cell', () {
-        pushAll(vm, [7, 8, 9, 10, 11, 12]);
+        vm.pushAll([7, 8, 9, 10, 11, 12]);
         SlideInstruction(1, 3).execute(vm);
         expect(vm.stackPointer, equals(4));
         expect(vm.stack.sublist(0, 6), equals([7, 8, 10, 11, 12, 12]));
@@ -288,7 +288,7 @@ void main() {
     });
 
     test('`mkV` wraps the top n stack values in a `TaggedList`', () {
-      pushAll(vm, [2, 4, 6, 8]);
+      vm.pushAll([2, 4, 6, 8]);
       AllocateTaggedListInstruction(3).execute(vm);
       expect(vm.stackPointer, equals(1));
       expect(vm.peek(), equals(maxAddress));
@@ -304,13 +304,14 @@ void main() {
       final argVector = vm.heap[maxAddress] as TaggedList;
       expect(argVector.length, 0);
 
-      final taggedFunction = vm.heap[maxAddress - 2] as TaggedFunction;
+      final fObjAddress = maxAddress - argVector.sizeInCells;
+      final taggedFunction = vm.heap[fObjAddress] as TaggedFunction;
       expect(taggedFunction.functionLabel, equals('E'));
       expect(taggedFunction.globalVectorAddress, equals(12));
       expect(taggedFunction.argumentVectorAddress, equals(maxAddress));
 
       expect(vm.stackPointer, equals(0));
-      expect(vm.peek(), equals(maxAddress - 2));
+      expect(vm.peek(), equals(fObjAddress));
     });
 
     test('`mkC` replaces the top stack value with a `TaggedClosure` pointer',
@@ -336,9 +337,14 @@ void main() {
       PushLocalInstruction(0).execute(vm);
       expect(vm.stackPointer, equals(6));
       expect(vm.peek(), equals(3));
+
       PushLocalInstruction(1).execute(vm);
       expect(vm.stackPointer, equals(7));
       expect(vm.peek(), equals(4));
+
+      PushLocalInstruction(-1).execute(vm);
+      expect(vm.stackPointer, equals(8));
+      expect(vm.peek(), equals(2));
     });
 
     test('`pushG` pushes a value from the global vector onto the stack', () {
@@ -536,7 +542,7 @@ void main() {
       RewriteInstruction(1).execute(vm);
       expect(vm.stackPointer, equals(0));
       expect(vm.heap[maxAddress], equals(c2));
-      expect(vm.heap[maxAddress - c2.sizeInCells], equals(c2));
+      expect(vm.heap[maxAddress - taggedClosureSize], equals(c2));
     });
 
     test('`copyglob` pushes the current GP onto the stack', () {
