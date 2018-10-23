@@ -7,6 +7,9 @@ final throwsVmRuntimeException =
 
 const maxAddress = 31;
 
+final taggedClosureSize = TaggedClosure(null, null).sizeInCells;
+final taggedFunctionSize = TaggedFunction(null, null, null).sizeInCells;
+
 class MockInstruction extends Mock implements Instruction {}
 
 void main() {
@@ -507,7 +510,6 @@ void main() {
     });
 
     test('`dummy n` places n `TaggedClosure`s on the stack', () {
-      final taggedClosureSize = 2;
       DummyInstruction(3).execute(vm);
       expect(vm.stackPointer, equals(2));
       expect(
