@@ -59,3 +59,8 @@
   border: 1px solid black;
   margin: 3px;
 }
+
+.assembly-editor {
+  height: 100%;
+  resize: none;
+}

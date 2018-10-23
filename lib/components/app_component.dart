@@ -6,6 +6,8 @@ import 'package:angular_forms/angular_forms.dart';
 import 'package:fvm/assembly_parser.dart';
 import 'package:fvm/virtual_machine.dart';
 
+import 'heap_allocated_object_component.dart';
+
 const exampleProgram = '''
 loadc 3,
 A:
@@ -26,7 +28,8 @@ halt
       NgIf,
       NgSwitch,
       NgSwitchWhen,
-      formDirectives
+      formDirectives,
+      HeapAllocatedObjectComponent
     ])
 class AppComponent implements OnInit {
   static const executionMode = #executionMode;
