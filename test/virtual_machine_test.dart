@@ -15,8 +15,8 @@ class MockInstruction extends Mock implements Instruction {}
 
 void main() {
   group('VM', () {
-    VM vm;
-    setUp(() => vm = VM(const [], const {}, maxAddress: maxAddress));
+    InspectableVM vm;
+    setUp(() => vm = InspectableVM(const [], const {}, maxAddress: maxAddress));
 
     test(
         '`push()` increases the stack pointer, '
@@ -72,7 +72,7 @@ void main() {
         '`executeCurrentInstruction()` increases `programCounter`, '
         'then executes the instruction at the old `programCounter` index', () {
       final i1 = MockInstruction();
-      final vm = VM([i1], const {});
+      final vm = InspectableVM([i1], const {});
       var pcDuringInstructionCall = vm.programCounter;
 
       when(i1.execute(vm))
@@ -101,8 +101,8 @@ void main() {
   });
 
   group('instructions', () {
-    VM vm;
-    setUp(() => vm = VM(const [], const {}, maxAddress: maxAddress));
+    InspectableVM vm;
+    setUp(() => vm = InspectableVM(const [], const {}, maxAddress: maxAddress));
 
     test('`loadc` pushes a value on the stack', () {
       LoadConstantInstruction(4).execute(vm);
@@ -111,21 +111,21 @@ void main() {
     });
 
     test('`jump` sets the `programCounter`', () {
-      final vm = VM(const [], const {'A': 60});
+      final vm = InspectableVM(const [], const {'A': 60});
       JumpInstruction('A').execute(vm);
       expect(vm.programCounter, equals(60));
     });
 
     group('`jumpz`', () {
       test('sets the `programCounter` if the top stack value is 0', () {
-        final vm = VM(const [], const {'B': 30})..push(0);
+        final vm = InspectableVM(const [], const {'B': 30})..push(0);
         JumpIfZeroInstruction('B').execute(vm);
         expect(vm.programCounter, equals(30));
         expect(vm.stackPointer, equals(-1));
       });
 
       test('does nothing if the top stack value is not 0', () {
-        final vm = VM(const [], const {'B': 30})..push(5);
+        final vm = InspectableVM(const [], const {'B': 30})..push(5);
         JumpIfZeroInstruction('B').execute(vm);
         // Note: the program counter should be the same as before, because we
         // don't call [VM.executeCurrentInstruction].
@@ -404,7 +404,7 @@ void main() {
 
     test('`mark` stores the register contents and return address on the stack',
         () {
-      final vm = VM(const [], const {'T': 40})
+      final vm = InspectableVM(const [], const {'T': 40})
         ..stackPointer = 5
         ..stackPointer0 = 12
         ..globalPointer = 13
@@ -438,8 +438,7 @@ void main() {
     });
 
     group('`apply0` sets the GP and PC from a', () {
-      VM vm;
-      setUp(() => vm = VM(const [], const {'T': 100}, maxAddress: 31)
+      setUp(() => vm = InspectableVM(const [], const {'T': 100}, maxAddress: 31)
         ..push(maxAddress));
 
       test('`TaggedFunction`', () {

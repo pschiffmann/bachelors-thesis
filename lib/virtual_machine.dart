@@ -16,16 +16,16 @@ const int defaultMaxAddress = (2 << 16) - 1;
 ///
 /// A VM object is mutable and supports modifications from outside. To run
 /// [program], you can use [executeProgram] or [executeCurrentInstruction].
-class VM {
+abstract class VM {
   VM(List<Instruction> program, Map<String, int> labelAddresses,
       {this.maxAddress = defaultMaxAddress,
       int initialStackSize = defaultInitialStackSize})
       : program = List.unmodifiable(program),
-        labelAddresses = Map.unmodifiable(labelAddresses),
+        _labelAddresses = Map.unmodifiable(labelAddresses),
         stack = Int32List(initialStackSize);
 
   final List<Instruction> program;
-  final Map<String, int> labelAddresses;
+  final Map<String, int> _labelAddresses;
   final int maxAddress;
   final Int32List stack;
 
@@ -135,9 +135,17 @@ class VM {
   /// Throws a [VmRuntimeException] if [label] is not defined and can't be
   /// parsed as an [int].
   int lookupLabel(String label) =>
-      labelAddresses[label] ??
+      _labelAddresses[label] ??
       int.tryParse(label) ??
       (throw VmRuntimeException('Undefined label `$label`'));
+}
+
+class InspectableVM extends VM {
+  InspectableVM(List<Instruction> program, Map<String, int> labelAddresses,
+      {int maxAddress = defaultMaxAddress,
+      int initialStackSize = defaultInitialStackSize})
+      : super(program, labelAddresses,
+            maxAddress: maxAddress, initialStackSize: initialStackSize);
 }
 
 /// Thrown by [Instruction]s if they encounter an invalid situation, for example
