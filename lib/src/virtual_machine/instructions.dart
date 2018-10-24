@@ -235,15 +235,8 @@ class PushGlobalInstruction implements Instruction {
 class UnwrapTaggedIntInstruction implements Instruction {
   const UnwrapTaggedIntInstruction();
   @override
-  void execute(VM vm) {
-    final obj = vm.heap[vm.peek()];
-    if (obj is TaggedInt) {
-      vm.replace(obj.value);
-    } else {
-      throw const VmRuntimeException('no B-object!');
-    }
-  }
-
+  void execute(VM vm) =>
+      vm.replaceTop(vm.dereferenceAs<TaggedInt>(vm.peek()).value);
   @override
   String toString() => 'getB';
 }
@@ -381,7 +374,7 @@ class Apply0Instruction implements Instruction {
   @override
   void execute(VM vm) {
     final address = vm.pop();
-    final obj = vm.heap[address];
+    final obj = vm.dereferenceAs(address);
     if (obj is TaggedFunction) {
       vm
         ..globalPointer = obj.globalVectorAddress
@@ -499,24 +492,8 @@ class RewriteInstruction implements Instruction {
   @override
   void execute(VM vm) {
     final oldValueAddress = vm.stack[vm.stackPointer - difference];
-    final oldValue = vm.heap[oldValueAddress];
-    if (oldValue == null) {
-      throw VmRuntimeException(
-          'Nothing to replace at address $oldValueAddress');
-    }
-
     final newValueAddress = vm.pop();
-    final newValue = vm.heap[newValueAddress];
-    if (newValue == null) {
-      throw VmRuntimeException('No tagged object at $newValueAddress');
-    }
-
-    if (oldValue.sizeInCells < newValue.sizeInCells) {
-      throw VmRuntimeException('Not enough space for a '
-          '${abbreviations[newValue.runtimeType]}-object at $oldValueAddress');
-    }
-
-    vm.heap[oldValueAddress] = newValue;
+    vm.copyTaggedObject(newValueAddress, oldValueAddress);
   }
 
   @override
@@ -528,7 +505,7 @@ class EvaluateInstruction implements Instruction {
 
   @override
   void execute(VM vm) {
-    final obj = vm.heap[vm.peek()];
+    final obj = vm.dereferenceAs(vm.peek());
     if (obj is TaggedClosure) {
       const MarkProgramCounterInstruction().execute(vm);
       PushLocalInstruction(3).execute(vm);

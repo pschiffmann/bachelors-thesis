@@ -535,13 +535,16 @@ void main() {
     test('`rewrite j` copies a heap value to another heap address', () {
       final c1 = TaggedClosure('-1', -1);
       final c2 = TaggedClosure('real', 5);
-      final c1Addr = vm.allocate(c1);
+      final c1Addr = vm.allocate(c1); // Also the address of the c1 copy
       final c2Addr = vm.allocate(c2);
       vm.pushAll([c1Addr, c2Addr]);
       RewriteInstruction(1).execute(vm);
       expect(vm.stackPointer, equals(0));
-      expect(vm.heap[maxAddress], equals(c2));
-      expect(vm.heap[maxAddress - taggedClosureSize], equals(c2));
+      expect(vm.peek(), equals(c1Addr));
+      expect(vm.dereferenceAs(c2Addr), equals(c2));
+      final c2Copy = vm.dereferenceAs<TaggedClosure>(c1Addr);
+      expect(c2Copy, isNot(same(c2)));
+      expect(c2Copy.formattedCellValues, equals(c2.formattedCellValues));
     });
 
     test('`copyglob` pushes the current GP onto the stack', () {

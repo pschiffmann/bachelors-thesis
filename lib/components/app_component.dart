@@ -38,7 +38,7 @@ class AppComponent implements OnInit {
   /// The current mode of this component.
   Symbol mode = executionMode;
 
-  VM vm;
+  InspectableVM vm;
 
   String editorInput = exampleProgram;
   final List<String> parseErrors = [];
