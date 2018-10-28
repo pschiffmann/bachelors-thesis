@@ -5,45 +5,41 @@
   <div class="mdc-layout-grid__inner">
     <div class="mdc-layout-grid__cell">
       <h2>Stack</h2>
-      <div class="memory-block">
-        <pre>
+
+      <pre class="memory-block">
         <span *ngFor="let value of vm.stack"
-              class="memory-cell">{{value}}</span>
+              class="memory-cell number-value">{{value}}</span>
       </pre>
-      </div>
     </div>
 
     <div class="mdc-layout-grid__cell">
       <h2>Heap</h2>
-      <div class="memory-block">
-        <pre>
+      <pre class="memory-block">
         <heap-allocated-object *ngFor="let obj of vm.heap.values"
                               [taggedObject]="obj"></heap-allocated-object>
       </pre>
-      </div>
     </div>
 
     <div class="mdc-layout-grid__cell"
          [ngSwitch]="mode">
       <h2>program memory</h2>
 
-      <div *ngSwitchCase="executionMode"
+      <pre *ngSwitchCase="executionMode"
            class="memory-block">
-        <pre>
         <span *ngFor="let instruction of vm.program; let i = index"
-              class="instruction-cell">
+              class="memory-cell">
           {{instruction}}
           <span *ngIf="i==vm.programCounter"
                 class="pointer-indicator">PC</span>
         </span>
       </pre>
-      </div>
+
       <div *ngSwitchCase="editingMode">
         <pre>
-        <textarea wrap="off"
-                  class="assembly-editor"
-                  [(ngModel)]="editorInput"></textarea>
-      </pre>
+          <textarea wrap="off"
+                    class="assembly-editor"
+                    [(ngModel)]="editorInput"></textarea>
+        </pre>
         <ul>
           <li class="error"
               *ngFor="let error of parseErrors">{{error}}</li>
