@@ -16,21 +16,21 @@ const int defaultMaxAddress = (2 << 16) - 1;
 ///
 /// A VM object is mutable and supports modifications from outside. To run
 /// [program], you can use [executeProgram] or [executeCurrentInstruction].
-class VM {
+abstract class VM {
   VM(List<Instruction> program, Map<String, int> labelAddresses,
       {this.maxAddress = defaultMaxAddress,
       int initialStackSize = defaultInitialStackSize})
       : program = List.unmodifiable(program),
-        labelAddresses = Map.unmodifiable(labelAddresses),
+        _labelAddresses = Map.unmodifiable(labelAddresses),
         stack = Int32List(initialStackSize);
 
   final List<Instruction> program;
-  final Map<String, int> labelAddresses;
+  final Map<String, int> _labelAddresses;
   final int maxAddress;
   final Int32List stack;
 
   /// Stores heap-allocated objects. The keys are the addresses.
-  final Map<int, TaggedObject> heap = {};
+  final Map<int, TaggedObject> _heap = {};
 
   /// Stores the address of the instruction in [program] that will be executed
   /// by [executeCurrentInstruction]; abbreviated to `PC`.
@@ -47,12 +47,12 @@ class VM {
   /// [stack]; abbreviated to `FP`.
   int framePointer = -1;
 
-  /// Points to the address in [heap] of the current global vector (as an
+  /// Points to the address in [_heap] of the current global vector (as an
   /// [TaggedList]); abbreviated to `GP`.
   int globalPointer = -1;
 
   TaggedList get globalVector {
-    final obj = heap[globalPointer];
+    final obj = _heap[globalPointer];
     if (obj is TaggedList) {
       return obj;
     } else {
@@ -61,9 +61,10 @@ class VM {
     }
   }
 
-  /// Returns highest address in [heap] at which no object is allocated.
-  int get nextHeapAddress =>
-      heap.isEmpty ? maxAddress : heap.keys.last - heap.values.last.sizeInCells;
+  /// Returns highest address in [_heap] at which no object is allocated.
+  int get nextHeapAddress => _heap.isEmpty
+      ? maxAddress
+      : _heap.keys.last - _heap.values.last.sizeInCells;
 
   /// Fetches the instruction pointed to by [programCounter]; increases
   /// [programCounter] by 1; and then executes the fetched instruction.
@@ -105,23 +106,38 @@ class VM {
   }
 
   /// Replaces the current top of the stack with [value].
-  int replace(int value) => stack[stackPointer] = value;
+  int replaceTop(int value) => stack[stackPointer] = value;
 
   /// Pushes [object] onto the heap and returns its address.
   int allocate(TaggedObject object) {
     final address = nextHeapAddress;
-    heap[address] = object;
+    _heap[address] = object;
     return address;
   }
 
   /// Returns the [TaggedObject] at heap address [address], or throws a
   /// [VmRuntimeException] if the address doesn't reference a [T].
   T dereferenceAs<T extends TaggedObject>(int address) {
-    final obj = heap[address];
+    final obj = _heap[address];
     if (obj is T) {
       return obj;
     }
     throw VmRuntimeException('No ${abbreviations[T]}-object at $address');
+  }
+
+  void copyTaggedObject(int sourceAddress, int targetAddress) {
+    final objectToCopy = _heap[sourceAddress] ??
+        (throw VmRuntimeException('No tagged object at $sourceAddress'));
+    final overriddenObject = _heap[sourceAddress] ??
+        (throw VmRuntimeException(
+            'No tagged object to override at $targetAddress'));
+    final wastedMemory =
+        overriddenObject.sizeInCells - objectToCopy.sizeInCells;
+    if (wastedMemory < 0) {
+      throw VmRuntimeException('Object at $sourceAddress '
+          'is larger than the object at $targetAddress');
+    }
+    _heap[targetAddress] = objectToCopy.copy(wastedMemory);
   }
 
   /// Returns the address into [program] of the [Instruction] associated with
@@ -135,9 +151,19 @@ class VM {
   /// Throws a [VmRuntimeException] if [label] is not defined and can't be
   /// parsed as an [int].
   int lookupLabel(String label) =>
-      labelAddresses[label] ??
+      _labelAddresses[label] ??
       int.tryParse(label) ??
       (throw VmRuntimeException('Undefined label `$label`'));
+}
+
+class InspectableVM extends VM {
+  InspectableVM(List<Instruction> program, Map<String, int> labelAddresses,
+      {int maxAddress = defaultMaxAddress,
+      int initialStackSize = defaultInitialStackSize})
+      : super(program, labelAddresses,
+            maxAddress: maxAddress, initialStackSize: initialStackSize);
+
+  Map<int, TaggedObject> get heap => _heap;
 }
 
 /// Thrown by [Instruction]s if they encounter an invalid situation, for example
