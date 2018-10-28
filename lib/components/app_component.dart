@@ -38,7 +38,7 @@ class AppComponent implements OnInit {
   /// The current mode of this component.
   Symbol mode = executionMode;
 
-  VM vm;
+  InspectableVM vm;
 
   String editorInput = exampleProgram;
   final List<String> parseErrors = [];
@@ -49,7 +49,7 @@ class AppComponent implements OnInit {
   void initializeVM() {
     final parseResult = parse(editorInput,
         (message, offset) => parseErrors.add('at offset $offset: $message'));
-    vm = VM(parseResult.key, parseResult.value);
+    vm = InspectableVM(parseResult.key, parseResult.value);
   }
 
   void executeSingleInstruction() {
