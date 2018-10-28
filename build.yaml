@@ -1,0 +1,21 @@
+targets:
+  $default:
+    builders:
+      sass_builder|sass_builder:
+        enabled: true
+        generate_for:
+          - web/**
+        dev_options:
+          outputStyle: expanded
+        release_options:
+          outputStyle: compressed
+      angular_components|scss_builder:
+        enabled: true
+        generate_for:
+          - lib/**
+    sources:
+      include:
+        - lib/**
+        - web/**
+        - test/**
+        - node_modules/**

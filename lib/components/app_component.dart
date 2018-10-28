@@ -18,19 +18,20 @@ halt
 ''';
 
 @Component(
-    selector: 'fvm-app',
-    styleUrls: ['app_component.css'],
-    templateUrl: 'app_component.html',
-    directives: [
-      MaterialButtonComponent,
-      MaterialIconComponent,
-      NgFor,
-      NgIf,
-      NgSwitch,
-      NgSwitchWhen,
-      formDirectives,
-      HeapAllocatedObjectComponent
-    ])
+  selector: 'fvm-app',
+  templateUrl: 'app_component.html',
+  styleUrls: ['app_component.scss.css'],
+  directives: [
+    MaterialButtonComponent,
+    MaterialIconComponent,
+    NgFor,
+    NgIf,
+    NgSwitch,
+    NgSwitchWhen,
+    formDirectives,
+    HeapAllocatedObjectComponent
+  ],
+)
 class AppComponent implements OnInit {
   static const executionMode = #executionMode;
   static const editingMode = #editingMode;

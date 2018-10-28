@@ -3,7 +3,7 @@ import 'package:fvm/virtual_machine.dart';
 
 @Component(
     selector: 'heap-allocated-object',
-    styleUrls: ['heap_allocated_object_component.css'],
+    styleUrls: ['heap_allocated_object_component.scss.css'],
     templateUrl: 'heap_allocated_object_component.html',
     directives: [NgFor])
 class HeapAllocatedObjectComponent {

@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@material/layout-grid": "^0.40.1"
+  }
+}
