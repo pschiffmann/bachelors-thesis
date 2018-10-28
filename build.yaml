@@ -17,4 +17,5 @@ targets:
       include:
         - lib/**
         - web/**
+        - test/**
         - node_modules/**
