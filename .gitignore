@@ -20,6 +20,9 @@ doc/api/
 *.js.deps
 *.js.map
 
+# files created by npm
+node_modules/
+
 # OS specific and personal files
 .DS_Store
 literature
