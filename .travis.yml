@@ -3,6 +3,9 @@ language: dart
 dart:
 - stable
 
+before_install:
+  - npm install
+
 jobs:
   include:
     - stage: static_analysis

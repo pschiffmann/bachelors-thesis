@@ -1,19 +1,11 @@
+@import 'asset:fvm/node_modules/@material/layout-grid/mdc-layout-grid';
+
 :host {
   /* This is equivalent of the 'body' selector of a page. */
 }
 
-#stack {
-  float: left;
-  margin: 0 30px;
-}
-
-#program {
-  float: left;
-  margin: 0 30px;
-}
-
 .memory-block {
-  width: 100px;
+  /*width: 100px;*/
   counter-reset: line-number -1;
 }
 
@@ -21,7 +13,7 @@
   display: block;
   background-color: lightgrey;
   border: 1px solid grey;
-  width: 100px;
+  /*width: 100px;*/
   text-align: right;
   line-height: 1.5rem;
 }
