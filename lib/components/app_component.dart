@@ -8,6 +8,8 @@ import 'package:fvm/virtual_machine.dart';
 
 import 'heap_allocated_object_component.dart';
 
+const defaultMaxAddress = 255;
+
 const exampleProgram = '''
 loadc 3,
 A:
@@ -24,6 +26,8 @@ halt
   directives: [
     MaterialButtonComponent,
     MaterialIconComponent,
+    materialInputDirectives,
+    materialNumberInputDirectives,
     NgFor,
     NgIf,
     NgSwitch,
@@ -41,6 +45,8 @@ class AppComponent implements OnInit {
 
   InspectableVM vm;
 
+  int maxAddress = defaultMaxAddress;
+
   String editorInput = exampleProgram;
   final List<String> parseErrors = [];
 
@@ -50,7 +56,8 @@ class AppComponent implements OnInit {
   void initializeVM() {
     final parseResult = parse(editorInput,
         (message, offset) => parseErrors.add('at offset $offset: $message'));
-    vm = InspectableVM(parseResult.key, parseResult.value);
+    vm = InspectableVM(parseResult.key, parseResult.value,
+        maxAddress: maxAddress);
   }
 
   void executeSingleInstruction() {

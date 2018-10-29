@@ -43,6 +43,12 @@
       </pre>
 
       <div *ngSwitchCase="editingMode">
+        <material-input type="number"
+                        [(ngModel)]="maxAddress"
+                        required
+                        checkPositive
+                        label="max address"
+                        [floatingLabel]="true"></material-input>
         <pre>
           <textarea wrap="off"
                     class="assembly-editor"
