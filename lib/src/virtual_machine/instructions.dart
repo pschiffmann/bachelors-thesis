@@ -1,5 +1,7 @@
 part of fvm.virtual_machine;
 
+const halt = HaltInstruction();
+
 /// This class serves as the interface for instructions. Instruction objects
 /// encode an opcode (through their [runtimeType]) and the constant arguments
 /// required by this opcode. Instruction objects are immutable.

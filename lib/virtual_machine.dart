@@ -66,9 +66,16 @@ abstract class VM {
       ? maxAddress
       : _heap.keys.last - _heap.values.last.sizeInCells;
 
+  /// Returns `true` if the VM reached a [halt].
+  bool get terminated => program[programCounter] == halt;
+
   /// Fetches the instruction pointed to by [programCounter]; increases
   /// [programCounter] by 1; and then executes the fetched instruction.
-  void executeCurrentInstruction() => program[programCounter++].execute(this);
+  void executeCurrentInstruction() {
+    if (!terminated) {
+      program[programCounter++].execute(this);
+    }
+  }
 
   int executeProgram() {
     // ignore: literal_only_boolean_expressions

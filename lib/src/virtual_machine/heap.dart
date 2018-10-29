@@ -1,7 +1,7 @@
 part of fvm.virtual_machine;
 
 const abbreviations = {
-  TaggedInt: 'T',
+  TaggedInt: 'B',
   TaggedList: 'V',
   TaggedFunction: 'F',
   TaggedClosure: 'C'

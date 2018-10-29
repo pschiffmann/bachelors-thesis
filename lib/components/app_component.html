@@ -7,8 +7,16 @@
       <h2>Stack</h2>
 
       <pre class="memory-block">
-        <span *ngFor="let value of vm.stack"
-              class="memory-cell number-value">{{value}}</span>
+        <span *ngFor="let value of vm.stack; let i = index"
+              class="memory-cell number-value">
+          <span *ngIf="i == vm.stackPointer"
+                class="pointer-indicator">SP</span>
+          <span *ngIf="i == vm.stackPointer0"
+                class="pointer-indicator">SP<sub>0</sub></span>
+          <span *ngIf="i == vm.framePointer"
+                class="pointer-indicator">FP</span>
+          {{value}}
+        </span>
       </pre>
     </div>
 
@@ -48,7 +56,7 @@
 
       <div>
         <material-button raised
-                         [disabled]="mode != executionMode"
+                         [disabled]="mode != executionMode || vm.terminated"
                          (trigger)="executeSingleInstruction()">
           <material-icon icon="skip_next"></material-icon>
         </material-button>
