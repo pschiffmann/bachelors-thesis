@@ -21,7 +21,7 @@ final RegExp _scanPattern = RegExp(verbose(r'''
     [A-Za-z]\w*
     ( # instruction immediate arguments, which can be number literals or labels
       \s+
-      (\d+ | [A-Za-z]\w*)
+      (-? \s* \d+ | [A-Za-z]\w*)
     )*
   )
   \s* (,|$)
