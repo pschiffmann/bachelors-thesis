@@ -30,11 +30,11 @@ mit **free**(\x->x+n) = {n} und ρ2 = {x → (L, 0)} ⋃ {n → (G, 0)},
 sowie
 ```
   code_V^ρ1 incN n
-= mark C, code_C^ρ1 n, code_C^ρ1 incN, apply, C: ...
-= mark C, pushL 0,     pushL 1,        apply, C: ...
+= mark C, code_C^ρ1 n, setSP0, code_C^ρ1 incN, apply, C: ...
+= mark C, pushL 0,     setSP0, pushL 1,        apply, C: ...
 ```
 
 Insgesamt also:
 ```
-dummy 2, loadc 3, mkB, rewrite 2, pushG 0, mkV 1, mkF A, jump B, A: testArg 1, pushL 0, eval, getB, pushG 0, eval, getB, add, mkB, return 1, B: rewrite 1, mark C, pushL 0, pushL 1, apply, C: slide 2 1, halt
+dummy 2, loadc 3, mkB, rewrite 2, pushG 0, mkV 1, mkF A, jump B, A: testArg 1, pushL 0, eval, getB, pushG 0, eval, getB, add, mkB, return 1, B: rewrite 1, mark C, pushL 0, setSP0, pushL 1, apply, C: slide 2 1, halt
 ```
