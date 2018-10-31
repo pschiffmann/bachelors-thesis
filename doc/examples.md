@@ -32,9 +32,21 @@ halt
 
 ----------
 
+TODO: Translate this. It's like the program above, but actually uses partial application.
 ```
 let {
-  apply_rtl = (\x f -> f x);
   add = (\a b -> a + b);
-} in apply_rtl 2 (add 3)
+  add2 = add 2;
+} in add2 3
+```
+
+```
+dummy 2,
+mkV 0, mkF ADD, jump B, ADD: testArg 2, pushL 0, getB, pushL -1, getB, add, mkB, return 2, B:
+rewrite 2,
+mark A, loadc 2, mkB, pushL 1, eval, setSP0, apply, A:
+rewrite 1,
+mark RET, loadc 3, mkB, pushL 2, eval, setSP0, apply, RET:
+slide 2 1,
+halt
 ```
