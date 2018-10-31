@@ -316,7 +316,7 @@ class AllocateTaggedClosureInstruction implements Instruction {
 class SetStackPointer0Instruction implements Instruction {
   const SetStackPointer0Instruction();
   @override
-  void execute(VM vm) => vm.stackPointer0 = vm.stackPointer;
+  void execute(VM vm) => vm.stackPointer0 = vm.stackPointer - 1;
   @override
   String toString() => 'setSP0';
 }
