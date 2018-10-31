@@ -8224,7 +8224,7 @@ w=w.aS(null,C.k,$.$get$jr())
 $.aM=w}y.aK(w)
 this.r=y
 this.e=y.e
-z=new Q.Q(C.w,255,"loadc 3,\nA:\nloadc 4,\nadd,\njump A,\nhalt\n",H.q([],[z]))
+z=new Q.Q(C.w,255,"dummy 2,\nmkV 0, mkF ADD, jump B, ADD: testArg 2, pushL 0, getB, pushL -1, getB, add, mkB, return 2, B:\nrewrite 2,\npushL 1, mkV 1, mkF ADD2, jump C,\nADD2: testArg 1, mark D, loadc 2, mkB, pushL 0, setSP0, pushG 0, apply, D: return 1,\nC: rewrite 1,\nmark RET, loadc 3, mkB, setSP0, pushL 2, apply, RET:\nslide 2 1,\nhalt\n",H.q([],[z]))
 this.x=z
 this.r.Z(0,z,this.a.e)
 this.Y(this.e)
