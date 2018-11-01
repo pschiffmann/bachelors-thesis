@@ -6,10 +6,7 @@ import 'package:angular_forms/angular_forms.dart';
 import 'package:fvm/assembly_parser.dart';
 import 'package:fvm/virtual_machine.dart';
 
-import 'tagged_closure_component.dart';
-import 'tagged_function_component.dart';
-import 'tagged_int_component.dart';
-import 'tagged_list_component.dart';
+import 'tagged_object_components.dart';
 
 const defaultMaxAddress = 255;
 
@@ -34,7 +31,7 @@ halt
     TaggedList,
   ],
   templateUrl: 'app_component.html',
-  styleUrls: ['app_component.scss.css'],
+  styleUrls: ['app_component.scss.css', 'memory.scss.css'],
   directives: [
     MaterialButtonComponent,
     MaterialIconComponent,
@@ -73,10 +70,7 @@ class AppComponent implements OnInit {
   }
 
   void executeSingleInstruction() {
-    try {
-      vm.executeCurrentInstruction();
-      print(vm.stack);
-    } on UnsupportedError {} on IndexError {}
+    vm.executeCurrentInstruction();
   }
 
   ///

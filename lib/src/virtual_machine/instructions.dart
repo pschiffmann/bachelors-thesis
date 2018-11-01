@@ -479,7 +479,7 @@ class DummyInstruction implements Instruction {
   @override
   void execute(VM vm) {
     for (var i = 0; i < length; i++) {
-      vm.push(vm.allocate(TaggedClosure('-1', -1)));
+      vm.push(vm.allocate(TaggedClosure('-1', -1, 1)));
     }
   }
 
