@@ -13,9 +13,6 @@ abstract class TaggedObject {
   final int padding;
   String get tag => abbreviations[runtimeType];
   int get sizeInCells;
-  List<String> get formattedCellValues;
-  List<String> get _formattedPaddingCells =>
-      List.filled(padding, '', growable: false);
   TaggedObject copy(int padding);
 }
 
@@ -26,9 +23,6 @@ class TaggedInt extends TaggedObject {
 
   @override
   int get sizeInCells => 2 + padding;
-  @override
-  List<String> get formattedCellValues =>
-      [value.toString()] + _formattedPaddingCells;
   @override
   TaggedInt copy(int padding) => TaggedInt(value, padding);
 }
@@ -44,10 +38,6 @@ class TaggedList extends TaggedObject {
 
   @override
   int get sizeInCells => 2 + values.length + padding;
-  @override
-  List<String> get formattedCellValues =>
-      values.map((v) => v.toString()).toList(growable: false) +
-      _formattedPaddingCells;
   @override
   TaggedList copy(int padding) => TaggedList(values, padding);
 }
@@ -65,14 +55,6 @@ class TaggedFunction extends TaggedObject {
   @override
   int get sizeInCells => 4 + padding;
   @override
-  List<String> get formattedCellValues =>
-      [
-        functionLabel,
-        globalVectorAddress.toString(),
-        argumentVectorAddress.toString()
-      ] +
-      _formattedPaddingCells;
-  @override
   TaggedFunction copy(int padding) => TaggedFunction(
       functionLabel, globalVectorAddress, argumentVectorAddress, padding);
 }
@@ -87,10 +69,6 @@ class TaggedClosure extends TaggedObject {
 
   @override
   int get sizeInCells => 3 + padding;
-  @override
-  List<String> get formattedCellValues =>
-      [expressionLabel, globalVectorAddress.toString()] +
-      _formattedPaddingCells;
   @override
   TaggedClosure copy(int padding) =>
       TaggedClosure(expressionLabel, globalVectorAddress, padding);

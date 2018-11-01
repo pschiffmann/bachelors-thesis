@@ -23,8 +23,14 @@
     <div class="mdc-layout-grid__cell">
       <h2>Heap</h2>
       <pre class="memory-block">
-        <heap-allocated-object *ngFor="let obj of vm.heap.values"
-                              [taggedObject]="obj"></heap-allocated-object>
+        <template ngFor let-object [ngForOf]="vm.heap.values">
+          <div [ngSwitch]="object.runtimeType">
+            <tagged-int *ngSwitchCase="TaggedInt" [object]="object"></tagged-int>
+            <tagged-list *ngSwitchCase="TaggedList" [object]="object"></tagged-list>
+            <tagged-function *ngSwitchCase="TaggedFunction" [object]="object"></tagged-function>
+            <tagged-closure *ngSwitchCase="TaggedClosure" [object]="object"></tagged-closure>
+          </div>
+        </template>
       </pre>
     </div>
 
