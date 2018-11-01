@@ -5,7 +5,6 @@ import 'package:test/test.dart';
 const maxAddress = 31;
 
 final taggedIntSize = TaggedInt(null).sizeInCells;
-final taggedClosureSize = TaggedClosure(null, null).sizeInCells;
 final taggedFunctionSize = TaggedFunction(null, null, null).sizeInCells;
 
 final throwsVmRuntimeException =
@@ -514,7 +513,8 @@ void main() {
       expect(vm.stackPointer0, equals(5));
     });
 
-    test('`dummy n` places n `TaggedClosure`s on the stack', () {
+    test('`dummy n` places n `TaggedClosure`s with 1 padding on the stack', () {
+      final taggedClosureSize = TaggedClosure(null, null, 1).sizeInCells;
       DummyInstruction(3).execute(vm);
       expect(vm.stackPointer, equals(2));
       expect(

@@ -135,7 +135,7 @@ abstract class VM {
   void copyTaggedObject(int sourceAddress, int targetAddress) {
     final objectToCopy = _heap[sourceAddress] ??
         (throw VmRuntimeException('No tagged object at $sourceAddress'));
-    final overriddenObject = _heap[sourceAddress] ??
+    final overriddenObject = _heap[targetAddress] ??
         (throw VmRuntimeException(
             'No tagged object to override at $targetAddress'));
     final wastedMemory =
