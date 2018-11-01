@@ -6,7 +6,10 @@ import 'package:angular_forms/angular_forms.dart';
 import 'package:fvm/assembly_parser.dart';
 import 'package:fvm/virtual_machine.dart';
 
-import 'heap_allocated_object_component.dart';
+import 'tagged_closure_component.dart';
+import 'tagged_function_component.dart';
+import 'tagged_int_component.dart';
+import 'tagged_list_component.dart';
 
 const defaultMaxAddress = 255;
 
@@ -24,6 +27,12 @@ halt
 
 @Component(
   selector: 'fvm-app',
+  exports: [
+    TaggedClosure,
+    TaggedFunction,
+    TaggedInt,
+    TaggedList,
+  ],
   templateUrl: 'app_component.html',
   styleUrls: ['app_component.scss.css'],
   directives: [
@@ -31,12 +40,12 @@ halt
     MaterialIconComponent,
     materialInputDirectives,
     materialNumberInputDirectives,
-    NgFor,
-    NgIf,
-    NgSwitch,
-    NgSwitchWhen,
+    coreDirectives,
     formDirectives,
-    HeapAllocatedObjectComponent
+    TaggedClosureComponent,
+    TaggedFunctionComponent,
+    TaggedIntComponent,
+    TaggedListComponent,
   ],
 )
 class AppComponent implements OnInit {

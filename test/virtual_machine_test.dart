@@ -544,7 +544,8 @@ void main() {
       expect(vm.dereferenceAs(c2Addr), equals(c2));
       final c2Copy = vm.dereferenceAs<TaggedClosure>(c1Addr);
       expect(c2Copy, isNot(same(c2)));
-      expect(c2Copy.formattedCellValues, equals(c2.formattedCellValues));
+      expect(c2Copy.expressionLabel, equals(c2.expressionLabel));
+      expect(c2Copy.globalVectorAddress, equals(c2.globalVectorAddress));
     });
 
     test('`copyglob` pushes the current GP onto the stack', () {
