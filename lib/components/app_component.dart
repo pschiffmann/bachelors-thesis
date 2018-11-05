@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:html';
 
 import 'package:angular/angular.dart';
 import 'package:angular_components/angular_components.dart';
@@ -65,12 +66,18 @@ class AppComponent implements OnInit {
   void initializeVM() {
     final parseResult = parse(editorInput,
         (message, offset) => parseErrors.add('at offset $offset: $message'));
-    vm = InspectableVM(parseResult.key, parseResult.value,
-        maxAddress: maxAddress);
+    if (parseResult != null) {
+      vm = InspectableVM(parseResult.key, parseResult.value,
+          maxAddress: maxAddress);
+    }
   }
 
   void executeSingleInstruction() {
-    vm.executeCurrentInstruction();
+    try {
+      vm.executeCurrentInstruction();
+    } on VmRuntimeException catch (e) {
+      window.alert(e.message);
+    }
   }
 
   ///

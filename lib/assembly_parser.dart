@@ -102,6 +102,11 @@ MapEntry<List<Instruction>, Map<String, int>> parse(final String input,
     final match = _scanPattern.matchAsPrefix(input, offset);
     if (match == null) {
       onError('Unrecognized input', offset);
+      final remainingLine = singleLine.matchAsPrefix(input, offset);
+      if (remainingLine == null) {
+        return null;
+      }
+      offset += remainingLine.group(0).length;
       continue;
     }
 

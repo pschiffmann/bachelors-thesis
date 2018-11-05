@@ -20,7 +20,7 @@ jobs:
 
     - stage: build_webapp
       name: webdev build & deploy
-      script: pub run webdev build
+      script: pub run webdev build --no-release
       deploy:
         provider: pages
         "local-dir": build
