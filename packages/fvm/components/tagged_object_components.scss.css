@@ -1,0 +1,12 @@
+:host {
+  display: flex;
+  flex-direction: column;
+}
+
+.tagged-object {
+  border: 1px solid #000;
+}
+
+.padding {
+  text-align: center;
+}
