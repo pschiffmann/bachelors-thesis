@@ -11,6 +11,9 @@ abstract class TaggedObjectComponent<T extends TaggedObject> {
   T get object => _object;
   T _object;
 
+  @Input()
+  bool isGlobalVector;
+
   List<Null> padding;
 }
 
@@ -18,46 +21,62 @@ abstract class TaggedObjectComponent<T extends TaggedObject> {
     selector: 'tagged-closure',
     styleUrls: ['tagged_object_components.scss.css', 'memory.scss.css'],
     template: '''
-<span class="memory-cell tag">C</span>
+<span class="memory-cell tag">
+  C
+  <span *ngIf="isGlobalVector"
+        class="pointer-indicator">GP</span>
+</span>
 <span class="memory-cell number-value">{{object.expressionLabel}}</span>
 <span class="memory-cell number-value">{{object.globalVectorAddress}}</span>
 <span class="memory-cell padding"
       *ngFor="let _ of padding">...</span>
 ''',
-    directives: [NgFor])
+    directives: [coreDirectives])
 class TaggedClosureComponent extends TaggedObjectComponent<TaggedClosure> {}
 
 @Component(
     selector: 'tagged-function',
     styleUrls: ['tagged_object_components.scss.css', 'memory.scss.css'],
     template: '''
-<span class="memory-cell tag">F</span>
+<span class="memory-cell tag">
+  F
+  <span *ngIf="isGlobalVector"
+        class="pointer-indicator">GP</span>
+</span>
 <span class="memory-cell number-value">{{object.functionLabel}}</span>
 <span class="memory-cell number-value">{{object.globalVectorAddress}}</span>
 <span class="memory-cell number-value">{{object.argumentVectorAddress}}</span>
 <span class="memory-cell padding"
       *ngFor="let _ of padding">...</span>
 ''',
-    directives: [NgFor])
+    directives: [coreDirectives])
 class TaggedFunctionComponent extends TaggedObjectComponent<TaggedFunction> {}
 
 @Component(
     selector: 'tagged-int',
     styleUrls: ['tagged_object_components.scss.css', 'memory.scss.css'],
     template: '''
-<span class="memory-cell tag">B</span>
+<span class="memory-cell tag">
+  B
+  <span *ngIf="isGlobalVector"
+        class="pointer-indicator">GP</span>
+</span>
 <span class="memory-cell number-value">{{object.value}}</span>
 <span class="memory-cell padding"
       *ngFor="let _ of padding">...</span>
 ''',
-    directives: [NgFor])
+    directives: [coreDirectives])
 class TaggedIntComponent extends TaggedObjectComponent<TaggedInt> {}
 
 @Component(
     selector: 'tagged-list',
     styleUrls: ['tagged_object_components.scss.css', 'memory.scss.css'],
     template: '''
-<span class="memory-cell tag">V</span>
+<span class="memory-cell tag">
+  V
+  <span *ngIf="isGlobalVector"
+        class="pointer-indicator">GP</span>
+</span>
 <span class="memory-cell number-value">{{object.length}}</span>
 <span *ngFor="let value of object.values"
       class="memory-cell number-value">
@@ -66,5 +85,5 @@ class TaggedIntComponent extends TaggedObjectComponent<TaggedInt> {}
 <span class="memory-cell padding"
       *ngFor="let _ of padding">...</span>
 ''',
-    directives: [NgFor])
+    directives: [coreDirectives])
 class TaggedListComponent extends TaggedObjectComponent<TaggedList> {}

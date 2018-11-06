@@ -10,3 +10,7 @@
 .number-value {
   text-align: right;
 }
+
+.pointer-indicator {
+  background: turquoise;
+}

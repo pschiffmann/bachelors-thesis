@@ -23,12 +23,20 @@
     <div class="mdc-layout-grid__cell">
       <h2>Heap</h2>
       <pre class="memory-block">
-        <template ngFor let-object [ngForOf]="vm.heap.values">
-          <div [ngSwitch]="object.runtimeType">
-            <tagged-int *ngSwitchCase="TaggedInt" [object]="object"></tagged-int>
-            <tagged-list *ngSwitchCase="TaggedList" [object]="object"></tagged-list>
-            <tagged-function *ngSwitchCase="TaggedFunction" [object]="object"></tagged-function>
-            <tagged-closure *ngSwitchCase="TaggedClosure" [object]="object"></tagged-closure>
+        <template ngFor let-object let-i="index" [ngForOf]="vm.heap.entries">
+          <div [ngSwitch]="object.value.runtimeType">
+            <tagged-int *ngSwitchCase="TaggedInt"
+                        [object]="object.value"
+                        [isGlobalVector]="object.key == vm.globalPointer"></tagged-int>
+            <tagged-list *ngSwitchCase="TaggedList"
+                         [object]="object.value"
+                         [isGlobalVector]="object.key == vm.globalPointer"></tagged-list>
+            <tagged-function *ngSwitchCase="TaggedFunction"
+                             [object]="object.value"
+                             [isGlobalVector]="object.key == vm.globalPointer"></tagged-function>
+            <tagged-closure *ngSwitchCase="TaggedClosure"
+                            [object]="object.value"
+                            [isGlobalVector]="object.key == vm.globalPointer"></tagged-closure>
           </div>
         </template>
       </pre>
