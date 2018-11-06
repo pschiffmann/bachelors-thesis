@@ -395,10 +395,10 @@ void main() {
       });
     });
 
-    test('`setSP0` sets SP0 to SP - 1', () {
+    test('`setSP0` sets SP0 to the value of SP', () {
       vm.stackPointer = 4;
       const SetStackPointer0Instruction().execute(vm);
-      expect(vm.stackPointer0, equals(3));
+      expect(vm.stackPointer0, equals(4));
     });
 
     test('`mark` stores the register contents and return address on the stack',
