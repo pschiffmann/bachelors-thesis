@@ -74,5 +74,6 @@ dot f g 5
 1: Genau genommen gäbe es noch eine andere Möglichkeit:
 Funktionsanwendungen könnten grundsätzlich nur einen einzigen Parameter an die Funktion übergeben.
 Damit würde man das Prinzip des Currying ganz buchstäblich implementieren.
+Das vereinfacht zwar die Übersetzung von Funktionsaufrufen erheblich, weil bei ein-elementigen Argumentlisten die Auswertungsreihenfolge (links nach rechts bzw. rechts nach links) keine Rolle mehr spielt.
 Dieses Vorgehen würde aber erfordern, dass für jeden Parameter ein eigener Funktionsaufruf durchgeführt und ein neues F-Objekt allokiert werden.
 </sup>
