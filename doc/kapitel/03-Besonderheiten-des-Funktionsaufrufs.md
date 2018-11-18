@@ -53,6 +53,10 @@ Als direkte Folge daraus ist die Funktion jetzt "überversorgt".
 
 ## Komposition
 
+```Haskell
+(.) :: (b -> c) -> (a -> b) -> (a -> c)
+```
+
 Beispiel:
 ```
 let {
@@ -70,7 +74,8 @@ dot f g 5
 
 ## Anforderungen
 
-Insgesamt muss ein Aufrufschema also folgende Szenarien unterstützen:
+Insgesamt muss ein Aufrufschema also folgende Szenarien unterstützen.
+Dabei ist jeweils zu prüfen, ob bzw. mit welchem Aufwand die Funktionsargumente und die lokalen Variablen adressiert werden können.
 
  1. Eine Funktion wird unterversorgt.
     Das Ergebnis ist ein neues Funktionsobjekt, das alle bereits übergenen Argumente in seinem _ap_-Vektor speichert.
