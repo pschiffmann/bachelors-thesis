@@ -17,7 +17,7 @@ addTwo 3
 ```
 
 Die im `let`-Ausdruck deklarierte Variable `addTwo` enthält das Ergebnis einer "unterversorgten" Funktionsanwendung:
-Der Wert 2 wurde bereits an den Parameter `a` der Funktion `add` gebunden, aber da noch kein Wert für `b` zur Verfügung steht, ist das Ergebnis keine Zahl, sondern eine (einstellige) Funktion.
+Der Wert 2 wurde bereits an den Parameter `a` der Funktion `add` gebunden, aber da noch kein Wert für `b` zur Verfügung steht, ist das Ergebnis keine Zahl, sondern eine nun einstellige Funktion.
 Der Aufruf `addTwo 3` ruft anschließend diese Funktion auf und übergibt das fehlende Argument.
 
 Damit dieses Programm funktioniert, muss der Compiler teilweise Funktionsanwendung überhaupt implementieren.
@@ -45,7 +45,7 @@ let {
 toZero 5 5
 ```
 
-Wir sehen, dass das erste Argument des `toZero`-Aufrufs für die Funktion selbst bestimmt ist, und das dieser Aufruf auf die Funktion `dec` ausgewertet wird, die dann das zweite Argument aufnimmt.
+Wir sehen, dass das erste Argument des `toZero`-Aufrufs für die Funktion selbst bestimmt ist, und dass dieser Aufruf auf die Funktion `dec` ausgewertet wird, die dann das zweite Argument aufnimmt.
 Der Compiler sieht es aber nicht;
 er hat keine andere Wahl, als `toZero` _alle_ Argumente zu übergeben.^1
 Als direkte Folge daraus ist die Funktion jetzt "überversorgt".
@@ -67,6 +67,18 @@ let {
 } in
 dot f g 5
 ```
+
+## Anforderungen
+
+Insgesamt muss ein Aufrufschema also folgende Szenarien unterstützen:
+
+ 1. Eine Funktion wird unterversorgt.
+    Das Ergebnis ist ein neues Funktionsobjekt, das alle bereits übergenen Argumente in seinem _ap_-Vektor speichert.
+ 2. Ein Funktionsobjekt, dessen _ap_ bereits Werte enthält, wird aufgerufen.
+    Die alten und neuen Argumente müssen zusammengeführt werden.
+ 3. Eine Funktion wird überversorgt.
+    Wir erwarten, dass das Ergebnis eine neue Funktion sein wird, die dann im gleichen Kellerrahmen ausgewertet wird.
+    Sie muss die übrig gebliebenen Argumente benutzen.
 
 ----------
 
