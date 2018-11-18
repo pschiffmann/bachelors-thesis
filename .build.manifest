@@ -2,7 +2,6 @@
 index.html
 main.dart.js
 packages/$sdk/_internal/ddc_sdk.sum
-packages/$sdk/_internal/spec.sum
 packages/$sdk/_internal/strong.sum
 packages/$sdk/dev_compiler/amd/dart_sdk.js
 packages/$sdk/dev_compiler/amd/require.js
