@@ -7512,7 +7512,7 @@ this.w(x)
 x=S.aK(y,"h1",this.r)
 this.x=x
 this.v(x)
-w=y.createTextNode("F-Maschine")
+w=y.createTextNode("FMa simulator")
 J.I(this.x,w)
 x=S.az(y,this.r)
 this.y=x
